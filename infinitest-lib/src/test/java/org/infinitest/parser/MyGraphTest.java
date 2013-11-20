@@ -27,22 +27,62 @@
  */
 package org.infinitest.parser;
 
-import static com.google.common.collect.Lists.*;
+import static com.google.common.collect.ImmutableSet.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.infinitest.util.FakeEnvironments.*;
 
-import java.io.*;
 import java.util.*;
 
 import org.junit.*;
 
-public class ClassFileIndexTest {
+public class MyGraphTest {
+	MyGraph graph = new MyGraph();
+
 	@Test
-	public void ignoreClassFilesThatCannotBeParsed() {
-		ClassFileIndex index = new ClassFileIndex(fakeClasspath());
+	public void find_parent() {
+		JavaClass javaClass = javaClass("Hello");
+		JavaClass javaTest = javaClass("HelloTest");
 
-		Set<JavaClass> foundClasses = index.findClasses(newArrayList(new File("notAClassFile")));
+		graph.addOrResetVertex(javaClass);
+		graph.addOrResetVertex(javaTest);
+		graph.addEdge(javaTest, javaClass);
 
-		assertThat(foundClasses).isEmpty();
+		Set<JavaClass> parents = graph.findParents(of(javaClass));
+
+		assertThat(parents).containsOnly(javaClass, javaTest);
+	}
+
+	@Test
+	public void find_self() {
+		JavaClass javaClass = javaClass("Hello");
+		JavaClass javaTest = javaClass("HelloTest");
+
+		graph.addOrResetVertex(javaClass);
+		graph.addOrResetVertex(javaTest);
+		graph.addEdge(javaTest, javaClass);
+
+		Set<JavaClass> parents = graph.findParents(of(javaTest));
+
+		assertThat(parents).containsOnly(javaTest);
+	}
+
+	@Test
+	public void find_grand_parent() {
+		JavaClass javaHelper = javaClass("HelloHelper");
+		JavaClass javaClass = javaClass("Hello");
+		JavaClass javaTest = javaClass("HelloTest");
+
+		graph.addOrResetVertex(javaHelper);
+		graph.addOrResetVertex(javaClass);
+		graph.addOrResetVertex(javaTest);
+		graph.addEdge(javaTest, javaClass);
+		graph.addEdge(javaClass, javaHelper);
+
+		Set<JavaClass> parents = graph.findParents(of(javaHelper));
+
+		assertThat(parents).containsOnly(javaHelper, javaClass, javaTest);
+	}
+
+	private static JavaClass javaClass(String name) {
+		return new FakeJavaClass(name);
 	}
 }

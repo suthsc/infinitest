@@ -36,6 +36,8 @@ import org.infinitest.parser.*;
  * @author bjrady
  */
 public interface TestFilter {
+	boolean acceptsNone();
+
 	/**
 	 * Forces an update of the filter, if controlled by an external resource.
 	 * This may be necessary if a test class has been removed or added from the

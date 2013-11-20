@@ -25,42 +25,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.infinitest.eclipse.workspace;
+package org.infinitest;
 
 import java.io.*;
-import java.util.*;
 
-import org.eclipse.core.runtime.*;
-import org.eclipse.jdt.core.*;
-
-public class FakeProjectSet implements ProjectSet {
-	private final IJavaProject project;
-
-	public FakeProjectSet(IJavaProject project) {
-		this.project = project;
-	}
-
-	@Override
-	public ProjectFacade findProject(IPath path) {
-		if (project.getPath().equals(path)) {
-			return new ProjectFacade(project);
+public class Log {
+	public static void log(String message) {
+		try {
+			FileWriter fileWriter = new FileWriter(new File("/Users/dgageot/Desktop/log"), true);
+			PrintWriter printWriter = new PrintWriter(fileWriter);
+			printWriter.println(message);
+			printWriter.close();
+		} catch (Throwable e) {
 		}
-		throw new UnsupportedOperationException();
 	}
-
-	@Override
-	public boolean hasErrors() throws CoreException {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<ProjectFacade> projects() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<File> outputDirectories(EclipseProject project) throws JavaModelException {
-		throw new UnsupportedOperationException();
-	}
-
 }

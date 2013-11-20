@@ -29,6 +29,9 @@ package org.infinitest.parser;
 
 import static org.infinitest.util.FakeEnvironments.*;
 import static org.junit.Assert.*;
+
+import java.io.*;
+
 import javassist.*;
 
 import org.junit.*;
@@ -99,7 +102,7 @@ public class WhenLookingForTests {
 
 	private JavaAssistClass classFor(Class<?> testClass) {
 		try {
-			return new JavaAssistClass(classPool.get(testClass.getName()));
+			return new JavaAssistClass(classPool.get(testClass.getName()), new File(testClass.getName()));
 		} catch (NotFoundException e) {
 			throw new RuntimeException(e);
 		}

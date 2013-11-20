@@ -27,10 +27,13 @@
  */
 package org.infinitest.parser;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.*;
 
+import java.io.*;
+
 import javassist.*;
+
 import javax.swing.*;
 
 import org.junit.*;
@@ -98,9 +101,9 @@ public class JavaAssistClassTest {
 	public void shouldIgnoreTestsWithStrangeOneArgConstructors() throws Exception {
 		ClassPool classPool = classPoolUtil.getClassPool();
 		CtClass fakeClass = classPool.makeClass("FakeClass");
-		CtClass[] params = {classPool.get(Integer.class.getName())};
+		CtClass[] params = { classPool.get(Integer.class.getName()) };
 		fakeClass.addConstructor(new CtConstructor(params, fakeClass));
-		assertFalse(new JavaAssistClass(fakeClass).canInstantiate(fakeClass));
+		assertFalse(new JavaAssistClass(fakeClass, new File("FakeClass")).canInstantiate(fakeClass));
 	}
 
 	private String[] dependenciesOf(Class<?> dependingClass) {

@@ -41,7 +41,9 @@ public class WorkspaceStatusFactory {
 	}
 
 	public static WorkspaceStatus runningTests(int remainingTests, String currentTest) {
-		String message = "Running " + stripPackageName(currentTest) + " (" + (remainingTests - 1) + " remaining)";
+		// String message = "Running " + stripPackageName(currentTest) + " (" +
+		// (remainingTests - 1) + " remaining)";
+		String message = "Running " + stripPackageName(currentTest) + " (" + remainingTests + " remaining)";
 		return new TooltippedStatus(message, "Current test: " + currentTest);
 	}
 

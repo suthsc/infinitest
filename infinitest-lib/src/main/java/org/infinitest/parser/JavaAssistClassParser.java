@@ -40,8 +40,6 @@ import javassist.*;
 import org.infinitest.*;
 
 import com.google.common.collect.*;
-import com.google.common.hash.Hashing;
-import com.google.common.io.*;
 
 public class JavaAssistClassParser {
 	private final String classpath;
@@ -52,11 +50,14 @@ public class JavaAssistClassParser {
 	}
 
 	public void clear() {
-		// classPool = null;
+		classPool = null;
+		CLASSES_BY_NAME.clear();
 	}
 
 	private ClassPool getClassPool() {
 		if (classPool == null) {
+			Log.log("CREATE POOL");
+
 			// This is used primarily for getting Java core objects like String
 			// and Integer,
 			// so if we don't have the project's JDK classpath, it's probably
@@ -92,46 +93,8 @@ public class JavaAssistClassParser {
 
 	private final static Map<String, JavaClass> CLASSES_BY_NAME = Maps.newHashMap();
 
-	public JavaClass getClass(String className) {
-		JavaClass clazz = CLASSES_BY_NAME.get(className);
-		if (clazz == null) {
-			CtClass ctClass = getCachedClass(className);
-
-			if (unparsableClass(ctClass)) {
-				clazz = new UnparsableClass(className);
-			} else {
-				JavaAssistClass javaAssistClass = new JavaAssistClass(ctClass);
-				URL url = getClassPool().find(className);
-				if ((url != null) && url.getProtocol().equals("file")) {
-					javaAssistClass.setClassFile(new File(url.getFile()));
-				}
-				clazz = javaAssistClass;
-			}
-
-			CLASSES_BY_NAME.put(className, clazz);
-		}
-
-		return clazz;
-	}
-
-	private final static Map<String, CacheEntry> BY_PATH = Maps.newHashMap();
-
-	public static class CacheEntry {
-		final String sha1;
-		final String classname;
-
-		public CacheEntry(String sha1, String classname) {
-			this.sha1 = sha1;
-			this.classname = classname;
-		}
-	}
-
 	public String classFileChanged(File file) throws IOException {
-		String sha1 = Files.hash(file, Hashing.sha1()).toString();
-		CacheEntry entry = BY_PATH.get(file.getAbsolutePath());
-		if ((entry != null) && (entry.sha1.equals(sha1))) {
-			return entry.classname;
-		}
+		Log.log("FileChanged : " + file);
 
 		FileInputStream inputStream = null;
 		try {
@@ -141,7 +104,6 @@ public class JavaAssistClassParser {
 			String classname = ctClass.getName();
 
 			CLASSES_BY_NAME.remove(classname);
-			BY_PATH.put(file.getAbsolutePath(), new CacheEntry(sha1, classname));
 
 			return classname;
 		} finally {
@@ -149,6 +111,29 @@ public class JavaAssistClassParser {
 				inputStream.close();
 			}
 		}
+	}
+
+	public JavaClass getClass(String className) {
+		JavaClass clazz = CLASSES_BY_NAME.get(className);
+		if (clazz == null) {
+			CtClass ctClass = getCachedClass(className);
+
+			if (unparsableClass(ctClass)) {
+				clazz = new UnparsableClass(className);
+			} else {
+				File classFile = null;
+				URL url = getClassPool().find(className);
+				if ((url != null) && url.getProtocol().equals("file")) {
+					classFile = new File(url.getFile());
+				}
+
+				clazz = new JavaAssistClass(ctClass, classFile);
+			}
+
+			CLASSES_BY_NAME.put(className, clazz);
+		}
+
+		return clazz;
 	}
 
 	private boolean unparsableClass(CtClass cachedClass) {

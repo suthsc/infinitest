@@ -39,6 +39,7 @@ import javassist.bytecode.*;
 import javassist.bytecode.annotation.*;
 import junit.framework.*;
 
+import org.infinitest.*;
 import org.junit.Test;
 import org.junit.runner.*;
 
@@ -46,19 +47,22 @@ import com.google.common.base.*;
 import com.google.common.collect.*;
 
 /**
- * Be careful: instances of this class are kept in a cache
- * so we should keep its footprint minimal.
+ * Be careful: instances of this class are kept in a cache so we should keep its
+ * footprint minimal.
  */
 public class JavaAssistClass extends AbstractJavaClass {
+	private final File classFile;
+	private final String className;
 	private final String[] imports;
 	private final boolean isATest;
-	private final String className;
-	private File classFile;
 
-	public JavaAssistClass(CtClass classReference) {
-		imports = findImports(classReference);
-		isATest = !isAbstract(classReference) && hasTests(classReference) && canInstantiate(classReference);
-		className = classReference.getName();
+	public JavaAssistClass(CtClass classReference, File classFile) {
+		Log.log("JavaAssistClass : " + classReference.getName());
+
+		this.classFile = classFile;
+		this.className = classReference.getName();
+		this.imports = findImports(classReference);
+		this.isATest = !isAbstract(classReference) && hasTests(classReference) && canInstantiate(classReference);
 	}
 
 	@Override
@@ -73,6 +77,8 @@ public class JavaAssistClass extends AbstractJavaClass {
 		addClassAnnotationDependencies(ctClass, imports);
 		addFieldAnnotationDependencies(ctClass, imports);
 		addMethodAnnotationDependencies(ctClass, imports);
+
+		imports.remove(ctClass.getName());
 
 		String[] array = new String[imports.size()];
 
@@ -150,14 +156,11 @@ public class JavaAssistClass extends AbstractJavaClass {
 
 	private void addDependenciesFromConstantPool(CtClass ctClass, Collection<String> imports) {
 		ConstPool constPool = ctClass.getClassFile2().getConstPool();
-		Set<?> classNames = constPool.getClassNames();
-		for (Object each : classNames) {
-			imports.add(pathToClassName(each.toString()));
-		}
-	}
 
-	private String pathToClassName(String classPath) {
-		return classPath.replace('/', '.');
+		Set<String> classNames = constPool.getClassNames();
+		for (String className : classNames) {
+			imports.add(className.replace('/', '.'));
+		}
 	}
 
 	@Override
@@ -209,7 +212,7 @@ public class JavaAssistClass extends AbstractJavaClass {
 	}
 
 	private boolean hasTestNameConstructor(CtClass[] parameterTypes) {
-		return (parameterTypes.length == 1) && parameterTypes[0].getName().equals(String.class.getName());
+		return (parameterTypes.length == 1) && parameterTypes[0].getName().equals("java.lang.String");
 	}
 
 	@Override
@@ -348,10 +351,6 @@ public class JavaAssistClass extends AbstractJavaClass {
 		}
 
 		return false;
-	}
-
-	public void setClassFile(File classFile) {
-		this.classFile = classFile;
 	}
 
 	@Override

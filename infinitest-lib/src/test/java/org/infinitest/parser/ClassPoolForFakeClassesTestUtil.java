@@ -29,6 +29,8 @@ package org.infinitest.parser;
 
 import static org.infinitest.util.FakeEnvironments.*;
 
+import java.io.*;
+
 import javassist.*;
 
 class ClassPoolForFakeClassesTestUtil {
@@ -54,7 +56,7 @@ class ClassPoolForFakeClassesTestUtil {
 
 	JavaAssistClass getClass(Class<?> dependingClass) {
 		try {
-			return new JavaAssistClass(classPool.get(dependingClass.getName()));
+			return new JavaAssistClass(classPool.get(dependingClass.getName()), new File(dependingClass.getName()));
 		} catch (NotFoundException e) {
 			throw new RuntimeException(e);
 		}

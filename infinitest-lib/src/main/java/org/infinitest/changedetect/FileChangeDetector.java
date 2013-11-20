@@ -31,16 +31,18 @@ import static java.lang.Character.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.*;
 
 import org.infinitest.*;
-import org.infinitest.util.*;
 
 public class FileChangeDetector implements ChangeDetector {
-	private Map<File, Long> timestampIndex;
+	private final static ClassFileFilter IS_CLASS_FILE = new ClassFileFilter();
+
+	private final Map<File, Long> timestampIndex;
 	private File[] classDirectories;
 
 	public FileChangeDetector() {
+		Log.log("FileChangeDetector " + System.identityHashCode(this));
+		timestampIndex = new HashMap<File, Long>();
 		classDirectories = new File[0];
 		clear();
 	}
@@ -53,41 +55,32 @@ public class FileChangeDetector implements ChangeDetector {
 	}
 
 	@Override
-	public synchronized Set<File> findChangedFiles() throws IOException {
-		return findFiles(classDirectories, false);
-	}
-
-	private Set<File> findFiles(File[] classesOrDirectories, boolean isPackage) throws IOException {
+	public synchronized Set<File> findChangedFiles() {
 		Set<File> changedFiles = new HashSet<File>();
-		for (File classFileOrDirectory : classesOrDirectories) {
-			if (classFileOrDirectory.isDirectory() && hasValidName(classFileOrDirectory, isPackage)) {
-				findChildren(changedFiles, classFileOrDirectory);
-			} else if (ClassFileFilter.isClassFile(classFileOrDirectory)) {
-				File classFile = classFileOrDirectory;
-				Long timestamp = timestampIndex.get(classFile);
-				if ((timestamp == null) || (getModificationTimestamp(classFile) != timestamp)) {
-					timestampIndex.put(classFile, getModificationTimestamp(classFile));
-					changedFiles.add(classFile);
-					InfinitestUtils.log(Level.FINEST, "Class file added to changelist " + classFile);
-				}
-			}
-		}
+
+		addFiles(classDirectories, false, changedFiles);
+
 		return changedFiles;
 	}
 
-	private void findChildren(Set<File> changedFiles, File classFileOrDirectory) throws IOException {
-		File[] children = childrenOf(classFileOrDirectory);
-		if (children != null) {
-			changedFiles.addAll(findFiles(children, true));
+	private void addFiles(File[] classesOrDirectories, boolean isPackage, Set<File> collector) {
+		for (File file : classesOrDirectories) {
+			if (file.isDirectory()) {
+				if (!isPackage || isJavaIdentifierStart(file.getName().charAt(0))) {
+					File[] children = file.listFiles(IS_CLASS_FILE);
+					if (children != null) {
+						addFiles(children, true, collector);
+					}
+				}
+			} else if (ClassFileFilter.isClassFile(file)) {
+				Long currentTimestamp = getModificationTimestamp(file);
+				Long oldTimestamp = timestampIndex.put(file, currentTimestamp);
+
+				if (!currentTimestamp.equals(oldTimestamp)) {
+					collector.add(file);
+				}
+			}
 		}
-	}
-
-	protected File[] childrenOf(File directory) {
-		return directory.listFiles(new ClassFileFilter());
-	}
-
-	private boolean hasValidName(File classfileOrDirectory, boolean isPackage) {
-		return !isPackage || isJavaIdentifierStart(classfileOrDirectory.getName().charAt(0));
 	}
 
 	protected long getModificationTimestamp(File classFile) {
@@ -96,21 +89,16 @@ public class FileChangeDetector implements ChangeDetector {
 
 	@Override
 	public synchronized void clear() {
-		timestampIndex = new HashMap<File, Long>();
-	}
-
-	private Set<File> findRemovedFiles() {
-		Set<File> removedFiles = new HashSet<File>();
-		for (File key : timestampIndex.keySet()) {
-			if (!key.exists()) {
-				removedFiles.add(key);
-			}
-		}
-		return removedFiles;
+		timestampIndex.clear();
 	}
 
 	@Override
 	public synchronized boolean filesWereRemoved() {
-		return !findRemovedFiles().isEmpty();
+		for (File key : timestampIndex.keySet()) {
+			if (!key.exists()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

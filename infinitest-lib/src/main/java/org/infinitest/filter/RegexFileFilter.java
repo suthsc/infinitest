@@ -42,49 +42,59 @@ import com.google.common.base.*;
 import com.google.common.io.*;
 
 public class RegexFileFilter implements TestFilter {
-  private final File file;
-  private final List<Pattern> filters = newArrayList();
+	private final File file;
+	private final List<Pattern> filters = newArrayList();
+	private boolean acceptsNone;
 
-  public RegexFileFilter(File file) {
-    this.file = file;
-    if (!file.exists()) {
-      log(INFO, "Filter file " + file + " does not exist.");
-    }
-    updateFilterList();
-  }
+	public RegexFileFilter(File file) {
+		this.file = file;
+		if (!file.exists()) {
+			log(INFO, "Filter file " + file + " does not exist.");
+		}
+		updateFilterList();
+	}
 
-  public boolean match(JavaClass javaClass) {
-    String className = javaClass.getName();
-    for (Pattern pattern : filters) {
-      if (pattern.matcher(className).lookingAt()) {
-        return true;
-      }
-    }
-    return false;
-  }
+	@Override
+	public boolean acceptsNone() {
+		return acceptsNone;
+	}
 
-  @Override
-  public void updateFilterList() {
-    filters.clear();
+	@Override
+	public boolean match(JavaClass javaClass) {
+		String className = javaClass.getName();
+		for (Pattern pattern : filters) {
+			if (pattern.matcher(className).lookingAt()) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    if (file.exists()) {
-      readFilterFile();
-    }
-  }
+	@Override
+	public void updateFilterList() {
+		filters.clear();
 
-  private void readFilterFile() {
-    try {
-      for (String line : Files.readLines(file, Charsets.UTF_8)) {
-        if (isValidFilter(line)) {
-          filters.add(Pattern.compile(line));
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Something horrible happened to the filter file", e);
-    }
-  }
+		if (file.exists()) {
+			readFilterFile();
+		}
+	}
 
-  private boolean isValidFilter(String line) {
-    return !isBlank(line) && !line.startsWith("!") && !line.startsWith("#");
-  }
+	private void readFilterFile() {
+		try {
+			for (String line : Files.readLines(file, Charsets.UTF_8)) {
+				if (isValidFilter(line)) {
+					if (line.trim().equals(".*")) {
+						acceptsNone = true;
+					}
+					filters.add(Pattern.compile(line));
+				}
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Something horrible happened to the filter file", e);
+		}
+	}
+
+	private boolean isValidFilter(String line) {
+		return !isBlank(line) && !line.startsWith("!") && !line.startsWith("#");
+	}
 }

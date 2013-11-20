@@ -39,9 +39,9 @@ import java.util.*;
 import org.eclipse.jdt.core.*;
 import org.junit.*;
 
-public class JavaProjectSetTest {
+public class ProjectSetTest {
 	private IJavaProject project;
-	private JavaProjectSet projectSet;
+	private ProjectSet projectSet;
 
 	@Before
 	public void inContext() {
@@ -53,7 +53,7 @@ public class JavaProjectSetTest {
 		ResourceFinder finder = mock(ResourceFinder.class);
 		List<IJavaProject> projects = newArrayList(project);
 		when(finder.getJavaProjects()).thenReturn(projects);
-		projectSet = new JavaProjectSet(finder);
+		projectSet = new ProjectSet(finder);
 	}
 
 	@Test

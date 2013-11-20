@@ -61,6 +61,11 @@ public class ClassFileTestDetector implements TestDetector {
 	@Override
 	public synchronized Set<JavaClass> findTestsToRun(Collection<File> changedFiles) {
 		filters.updateFilterList();
+		if (filters.acceptsNone()) {
+			return new HashSet<JavaClass>(); // No need to do anything for
+												// projects with
+												// catch all filter
+		}
 
 		// Find changed classes
 		Set<JavaClass> changedClasses = index.findClasses(changedFiles);
@@ -71,16 +76,17 @@ public class ClassFileTestDetector implements TestDetector {
 
 		// run through total set, and pick out tests to run
 		log(Level.FINE, "Total changeset: " + changedParents);
+		Log.log("Total changeset: " + changedParents);
 		return filterTests(changedClasses);
 	}
 
 	private Set<JavaClass> filterTests(Set<JavaClass> changedClasses) {
 		Set<JavaClass> testsToRun = new HashSet<JavaClass>();
-		for (JavaClass jclass : changedClasses) {
-			if (isATest(jclass) && inCurrentProject(jclass)) {
-				testsToRun.add(jclass);
+		for (JavaClass javaClass : changedClasses) {
+			if (javaClass.isATest() && !filters.match(javaClass) && inCurrentProject(javaClass)) {
+				testsToRun.add(javaClass);
 			} else {
-				log(Level.FINE, "Filtered test: " + jclass);
+				log(Level.FINE, "Filtered test: " + javaClass);
 			}
 		}
 		return testsToRun;
@@ -101,20 +107,12 @@ public class ClassFileTestDetector implements TestDetector {
 		return false;
 	}
 
-	private boolean isATest(JavaClass jclass) {
-		return jclass.isATest() && !filters.match(jclass);
+	public int size() {
+		return index.size();
 	}
 
-	boolean isIndexed(Class<Object> clazz) {
-		return index.isIndexed(clazz);
-	}
-
-	public Set<String> getIndexedClasses() {
-		return index.getIndexedClasses();
-	}
-
-	public JavaClass findJavaClass(String name) {
-		return index.findJavaClass(name);
+	public JavaClass findOrCreateJavaClass(String name) {
+		return index.findOrCreateJavaClass(name);
 	}
 
 	@Override
@@ -126,9 +124,9 @@ public class ClassFileTestDetector implements TestDetector {
 	@Override
 	public Set<String> getCurrentTests() {
 		Set<String> tests = newHashSet();
-		for (String each : getIndexedClasses()) {
-			if (isATest(index.findJavaClass(each))) {
-				tests.add(each);
+		for (JavaClass javaClass : index.getIndexedClasses()) {
+			if (javaClass.isATest() && !filters.match(javaClass) && inCurrentProject(javaClass)) {
+				tests.add(javaClass.getName());
 			}
 		}
 		return tests;

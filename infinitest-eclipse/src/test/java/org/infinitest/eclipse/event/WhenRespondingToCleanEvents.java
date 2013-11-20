@@ -36,6 +36,7 @@ import java.net.*;
 
 import org.eclipse.core.internal.events.*;
 import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.*;
 import org.infinitest.eclipse.*;
 import org.infinitest.eclipse.workspace.*;
@@ -53,7 +54,10 @@ public class WhenRespondingToCleanEvents extends ResourceEventSupport {
 
 	@Test
 	public void shouldRemoveCoreOnACleanBuild() throws JavaModelException {
-		processor = new CleanEventProcessor(coreRegistry, new FakeProjectSet(project));
+		ProjectSet projectSet = mock(ProjectSet.class);
+		when(projectSet.findProject(new Path("//projectA"))).thenReturn(new ProjectFacade(project));
+
+		processor = new CleanEventProcessor(coreRegistry, projectSet);
 		processEvent(cleanBuildEvent());
 
 		URI projectAUri = projectAUri();

@@ -41,7 +41,7 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.launching.*;
 
-class ProjectFacade implements EclipseProject {
+public class ProjectFacade implements EclipseProject {
 	private final IJavaProject project;
 
 	public ProjectFacade(IJavaProject project) {

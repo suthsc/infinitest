@@ -46,12 +46,12 @@ import org.springframework.stereotype.*;
 
 @Component
 class EclipseWorkspace implements WorkspaceFacade {
+	private final ProjectSet projectSet;
 	private final CoreRegistry coreRegistry;
 	private final CoreFactory coreFactory;
-	private WorkspaceStatus status;
 	private final List<WorkspaceStatusListener> statusListeners = newArrayList();
 	private final Events<UpdateListener> updateEvent = eventFor(UpdateListener.class);
-	private final ProjectSet projectSet;
+	private WorkspaceStatus status;
 
 	@Autowired
 	EclipseWorkspace(ProjectSet projectSet, CoreRegistry coreRegistry, CoreFactory coreFactory) {
@@ -70,10 +70,13 @@ class EclipseWorkspace implements WorkspaceFacade {
 		if (projectSet.hasErrors()) {
 			setStatus(workspaceErrors());
 		} else {
+			Log.log("<UPDATE PROJECTS> " + projectSet.projects().size());
 			int numberOfTestsToRun = updateProjectsIn(projectSet);
 			if (numberOfTestsToRun == 0) {
 				setStatus(noTestsRun());
 			}
+			Log.log("RUN " + numberOfTestsToRun);
+			Log.log("---------------------------------------");
 		}
 	}
 

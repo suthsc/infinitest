@@ -77,6 +77,10 @@ class DefaultInfinitestCore implements InfinitestCore {
 
 	@Override
 	public synchronized int update(Collection<File> changedFiles) {
+		if (changedFiles.isEmpty()) {
+			return 0;
+		}
+
 		log(CONFIG, "Core Update " + name);
 		int testsRun = runOptimizedTestSet(changedFiles);
 		caughtExceptions.clear();
@@ -88,7 +92,9 @@ class DefaultInfinitestCore implements InfinitestCore {
 	@Override
 	public synchronized int update() {
 		try {
-			return update(findChangedClassFiles());
+			Collection<File> findChangedClassFiles = findChangedClassFiles();
+			Log.log("<UPDATE FILES> " + findChangedClassFiles.size());
+			return update(findChangedClassFiles);
 		} catch (IOException e) {
 			checkForFatalError(e);
 		}
@@ -97,6 +103,7 @@ class DefaultInfinitestCore implements InfinitestCore {
 
 	@Override
 	public void reload() {
+		Log.log("RELOAD " + name);
 		log("Reloading core " + name);
 		testDetector.clear();
 		changeDetector.clear();

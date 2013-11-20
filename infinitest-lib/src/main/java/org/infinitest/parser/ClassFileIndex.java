@@ -27,22 +27,16 @@
  */
 package org.infinitest.parser;
 
-import static com.google.common.collect.Sets.*;
-import static org.jgrapht.Graphs.*;
-
 import java.io.*;
 import java.util.*;
 
 import org.infinitest.*;
-import org.jgrapht.*;
-import org.jgrapht.graph.*;
 
 import com.google.common.annotations.*;
-import com.google.common.collect.*;
 
 public class ClassFileIndex {
-	private final JavaClassBuilder builder;
-	private DirectedGraph<JavaClass, DefaultEdge> graph;
+	private final JavaClassBuilder classBuilder;
+	private final MyGraph graph;
 
 	public ClassFileIndex(ClasspathProvider classpath) {
 		this(new JavaClassBuilder(classpath));
@@ -50,85 +44,55 @@ public class ClassFileIndex {
 
 	@VisibleForTesting
 	ClassFileIndex(JavaClassBuilder classBuilder) {
-		builder = classBuilder;
-		graph = new DefaultDirectedGraph<JavaClass, DefaultEdge>(DefaultEdge.class);
+		this.classBuilder = classBuilder;
+		this.graph = new MyGraph();
 	}
 
 	public Set<JavaClass> findClasses(Collection<File> changedFiles) {
 		// First update class index
 		List<String> changedClassesNames = new ArrayList<String>();
 		for (File changedFile : changedFiles) {
-			String changedClassname = builder.classFileChanged(changedFile);
-			if (changedClassname != null) {
-				changedClassesNames.add(changedClassname);
-			}
+			changedClassesNames.add(classBuilder.classFileChanged(changedFile));
 		}
 
-		// Then find dependencies
-		Set<JavaClass> changedClasses = newHashSet();
+		// Create JavaClasses
+		Set<JavaClass> changedClasses = new HashSet<JavaClass>();
 		for (String changedClassesName : changedClassesNames) {
-			JavaClass javaClass = builder.getClass(changedClassesName);
-			if (javaClass != null) {
-				addToIndex(javaClass);
+			JavaClass javaClass = classBuilder.getClass(changedClassesName);
+			if (!(javaClass instanceof UnparsableClass)) {
 				changedClasses.add(javaClass);
 			}
 		}
-		builder.clear();
+
+		// Add to Index
+		for (JavaClass changedClass : changedClasses) {
+			addToIndex(changedClass);
+		}
+
 		return changedClasses;
 	}
 
-	public JavaClass findJavaClass(String classname) {
-		JavaClass clazz = findClass(classname);
-		if (clazz == null) {
-			clazz = builder.getClass(classname);
-			if (clazz.locatedInClassFile()) {
-				addToIndex(clazz);
-			}
+	public JavaClass findOrCreateJavaClass(String classname) {
+		// Index by name
+		JavaClass jClass = graph.findVertexByName(classname);
+		if (jClass != null) {
+			return jClass;
+		}
+
+		JavaClass clazz = classBuilder.getClass(classname);
+		if (clazz.locatedInClassFile()) {
+			addToIndex(clazz);
 		}
 		return clazz;
 	}
 
-	private JavaClass findClass(String classname) {
-		for (JavaClass jClass : graph.vertexSet()) {
-			if (jClass.getName().equals(classname)) {
-				return jClass;
-			}
-		}
-		return null;
-	}
-
 	private void addToIndex(JavaClass newClass) {
-		addToGraph(newClass);
-		updateParentReferences(newClass);
-	}
+		if (graph.addOrResetVertex(newClass)) {
+			Log.log("ADD EDGES : " + newClass);
 
-	private void addToGraph(JavaClass newClass) {
-		if (!graph.addVertex(newClass)) {
-			replaceVertex(newClass);
-		}
-	}
-
-	private List<JavaClass> getParents(JavaClass childClass) {
-		return predecessorListOf(graph, childClass);
-	}
-
-	private void replaceVertex(JavaClass newClass) {
-		List<JavaClass> incomingEdges = getParents(newClass);
-
-		graph.removeVertex(newClass);
-		graph.addVertex(newClass);
-		for (JavaClass each : incomingEdges) {
-			graph.addEdge(each, newClass);
-		}
-	}
-
-	private void updateParentReferences(JavaClass parentClass) {
-		for (String child : parentClass.getImports()) {
-			JavaClass childClass = findJavaClass(child);
-			if ((childClass != null) && !childClass.equals(parentClass)) {
-				if (graph.containsVertex(childClass)) {
-					graph.addEdge(parentClass, childClass);
-				}
+			for (String classname : newClass.getImports()) {
+				JavaClass childClass = findOrCreateJavaClass(classname);
+				graph.addEdge(newClass, childClass);
 			}
 		}
 	}
@@ -137,35 +101,19 @@ public class ClassFileIndex {
 	// parents)
 	// to another set of changed classes
 	public Set<JavaClass> findChangedParents(Set<JavaClass> classes) {
-		Set<JavaClass> changedParents = Sets.newHashSet(classes);
-		for (JavaClass jclass : classes) {
-			findParents(jclass, changedParents);
-		}
-		return changedParents;
+		return graph.findParents(classes);
 	}
 
-	private void findParents(JavaClass jclass, Set<JavaClass> changedParents) {
-		for (JavaClass parent : getParents(jclass)) {
-			if (changedParents.add(parent)) {
-				findParents(parent, changedParents);
-			}
-		}
+	public int size() {
+		return graph.size();
 	}
 
 	public void clear() {
-		graph = new DefaultDirectedGraph<JavaClass, DefaultEdge>(DefaultEdge.class);
+		classBuilder.clear();
+		graph.clear();
 	}
 
-	public boolean isIndexed(Class<Object> clazz) {
-		return getIndexedClasses().contains(clazz.getName());
-	}
-
-	public Set<String> getIndexedClasses() {
-		Set<String> classes = newHashSet();
-		Set<JavaClass> vertexSet = graph.vertexSet();
-		for (JavaClass each : vertexSet) {
-			classes.add(each.getName());
-		}
-		return classes;
+	public Set<JavaClass> getIndexedClasses() {
+		return graph.javaClasses();
 	}
 }

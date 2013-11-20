@@ -38,9 +38,9 @@ public class WhenTheRuntimeEnvironmentChanges extends DependencyGraphTestBase {
 	@Test
 	public void shouldRecreateTheClassFileIndex() {
 		addToDependencyGraph(FakeId.class);
-		assertEquals(1, getGraph().getIndexedClasses().size());
+		assertEquals(1, getGraph().size());
 
 		getGraph().setClasspathProvider(emptyClasspath());
-		assertEquals(0, getGraph().getIndexedClasses().size());
+		assertEquals(0, getGraph().size());
 	}
 }

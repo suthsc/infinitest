@@ -35,72 +35,75 @@ import static org.junit.Assert.*;
 import java.io.*;
 import java.util.*;
 
-import javassist.*;
-
 import org.infinitest.filter.*;
 import org.infinitest.util.*;
 import org.junit.*;
 
 public abstract class DependencyGraphTestBase {
-  private final FilterStub filter = new FilterStub();
-  private ClassFileTestDetector testDetector;
+	private final FilterStub filter = new FilterStub();
+	private ClassFileTestDetector testDetector;
 
-  @Before
-  public final void setUp() {
-    testDetector = new ClassFileTestDetector(filter);
-    testDetector.setClasspathProvider(fakeClasspath());
-    testDetector.findTestsToRun(Collections.<File>emptySet());
-  }
+	@Before
+	public final void setUp() {
+		testDetector = new ClassFileTestDetector(filter);
+		testDetector.setClasspathProvider(fakeClasspath());
+		testDetector.findTestsToRun(Collections.<File> emptySet());
+	}
 
-  protected Set<JavaClass> findTestsForChangedFiles(Class<?>... classes) {
-    Set<File> fileSet = new HashSet<File>();
-    for (Class<?> clazz : classes) {
-      fileSet.add(getFileForClass(clazz));
-    }
-    return getGraph().findTestsToRun(fileSet);
-  }
+	protected Set<JavaClass> findTestsForChangedFiles(Class<?>... classes) {
+		Set<File> fileSet = new HashSet<File>();
+		for (Class<?> clazz : classes) {
+			fileSet.add(getFileForClass(clazz));
+		}
+		return getGraph().findTestsToRun(fileSet);
+	}
 
-  protected void addToDependencyGraph(Class<?>... classes) {
-    findTestsForChangedFiles(classes);
-  }
+	protected void addToDependencyGraph(Class<?>... classes) {
+		findTestsForChangedFiles(classes);
+	}
 
-  protected void assertClassRecognizedAsTest(Class<?> testClass) {
-    Set<File> fileSet = setify(InfinitestTestUtils.getFileForClass(testClass));
-    Set<JavaClass> testsToRun = getGraph().findTestsToRun(fileSet);
-    assertEquals(testClass.getSimpleName() + " should have been recognized as a test", 1, testsToRun.size());
-    JavaClass testToRun = testsToRun.iterator().next();
-    assertEquals(testClass.getName(), testToRun.getName());
-    assertTrue(testToRun.isATest());
-  }
+	protected void assertClassRecognizedAsTest(Class<?> testClass) {
+		Set<File> fileSet = setify(InfinitestTestUtils.getFileForClass(testClass));
+		Set<JavaClass> testsToRun = getGraph().findTestsToRun(fileSet);
+		assertEquals(testClass.getSimpleName() + " should have been recognized as a test", 1, testsToRun.size());
+		JavaClass testToRun = testsToRun.iterator().next();
+		assertEquals(testClass.getName(), testToRun.getName());
+		assertTrue(testToRun.isATest());
+	}
 
-  protected void verifyDependency(Class<?> changedFile, Class<?> expectedTest) {
-    Set<JavaClass> testsToRun = findTestsForChangedFiles(changedFile);
-    assertTrue("Changing " + changedFile + " did not cause " + expectedTest + " to be run", testsToRun.contains(getGraph().findJavaClass(expectedTest.getName())));
-  }
+	protected void verifyDependency(Class<?> changedFile, Class<?> expectedTest) {
+		Set<JavaClass> testsToRun = findTestsForChangedFiles(changedFile);
+		assertTrue("Changing " + changedFile + " did not cause " + expectedTest + " to be run", testsToRun.contains(getGraph().findOrCreateJavaClass(expectedTest.getName())));
+	}
 
-  protected ClassFileTestDetector getGraph() {
-    return testDetector;
-  }
+	protected ClassFileTestDetector getGraph() {
+		return testDetector;
+	}
 
-  protected void addFilter(String className) {
-    filter.addClass(className);
-  }
+	protected void addFilter(String className) {
+		filter.addClass(className);
+	}
 
-  static class FilterStub implements TestFilter {
-    private final Set<String> classesToFilter = new HashSet<String>();
+	static class FilterStub implements TestFilter {
+		private final Set<String> classesToFilter = new HashSet<String>();
 
-    @Override
-    public boolean match(JavaClass javaClass) {
-      return classesToFilter.contains(javaClass.getName());
-    }
+		@Override
+		public boolean match(JavaClass javaClass) {
+			return classesToFilter.contains(javaClass.getName());
+		}
 
-    @Override
-    public void updateFilterList() {
-      // nothing to do here
-    }
+		@Override
+		public void updateFilterList() {
+			// nothing to do here
+		}
 
-    void addClass(String className) {
-      classesToFilter.add(className);
-    }
-  }
+		@Override
+		public boolean acceptsNone() {
+			return false;
+		}
+
+		void addClass(String className) {
+			classesToFilter.add(className);
+		}
+	}
 }
