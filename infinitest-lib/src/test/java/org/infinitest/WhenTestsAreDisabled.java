@@ -29,7 +29,6 @@ package org.infinitest;
 
 import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Sets.*;
-import static org.infinitest.CoreDependencySupport.*;
 import static org.infinitest.util.InfinitestUtils.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
@@ -40,8 +39,6 @@ import java.util.*;
 import org.infinitest.parser.*;
 import org.infinitest.testrunner.*;
 import org.junit.*;
-
-import com.fakeco.fakeproduct.simple.*;
 
 public class WhenTestsAreDisabled {
 	@SuppressWarnings("unchecked")
@@ -54,7 +51,7 @@ public class WhenTestsAreDisabled {
 		when(testDetector.findTestsToRun(any(Collection.class))).thenReturn(emptyClassSet);
 
 		DefaultInfinitestCore core = new DefaultInfinitestCore(runner, new ControlledEventQueue());
-		core.setChangeDetector(withChangedFiles(PassingTest.class));
+		// core.setChangeDetector(withChangedFiles(PassingTest.class));
 		core.setTestDetector(testDetector);
 		final Set<String> disabledTestList = newHashSet();
 		core.addDisabledTestListener(new DisabledTestListener() {

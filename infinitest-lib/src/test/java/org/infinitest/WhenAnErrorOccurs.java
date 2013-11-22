@@ -29,30 +29,26 @@ package org.infinitest;
 
 import static org.infinitest.CoreDependencySupport.*;
 
-import java.io.*;
-import java.util.*;
-
-import org.infinitest.changedetect.*;
 import org.junit.*;
 
 public class WhenAnErrorOccurs {
-	private ChangeDetector failingDetector;
 	protected boolean shouldFail;
 	private InfinitestCore core;
 
 	@Before
 	public void inContext() {
 		shouldFail = true;
-		failingDetector = new FakeChangeDetector() {
-			@Override
-			public Set<File> findChangedFiles() throws IOException {
-				if (shouldFail) {
-					throw new IOException();
-				}
-				return Collections.emptySet();
-			}
-		};
-		core = createCore(failingDetector, withNoTestsToRun());
+		// failingDetector = new FakeChangeDetector() {
+		// @Override
+		// public Set<File> findChangedFiles(File root) throws IOException {
+		// if (shouldFail) {
+		// throw new IOException();
+		// }
+		// return Collections.emptySet();
+		// }
+		// };
+		// core = createCore(failingDetector, withNoTestsToRun());
+		core = createCore(withNoTestsToRun());
 	}
 
 	@Test

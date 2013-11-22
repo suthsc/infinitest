@@ -36,7 +36,9 @@ public class WhenATestPasses {
 	@Test
 	public void shouldFireSuccessEvents() {
 		ControlledEventQueue eventQueue = new ControlledEventQueue();
-		DefaultInfinitestCore core = createCore(withChangedFiles(), withTests(PASSING_TEST), eventQueue);
+		// DefaultInfinitestCore core = createCore(withChangedFiles(),
+		// withTests(PASSING_TEST), eventQueue);
+		DefaultInfinitestCore core = createCore(withTests(PASSING_TEST), eventQueue);
 		ResultCollector collector = new ResultCollector(core);
 		EventSupport testStatus = new EventSupport();
 		core.addTestResultsListener(testStatus);

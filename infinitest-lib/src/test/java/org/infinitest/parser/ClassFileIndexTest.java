@@ -29,7 +29,6 @@ package org.infinitest.parser;
 
 import static com.google.common.collect.Lists.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.infinitest.util.FakeEnvironments.*;
 
 import java.io.*;
 import java.util.*;
@@ -39,7 +38,7 @@ import org.junit.*;
 public class ClassFileIndexTest {
 	@Test
 	public void ignoreClassFilesThatCannotBeParsed() {
-		ClassFileIndex index = new ClassFileIndex(fakeClasspath());
+		ClassFileIndex index = ClassFileIndex.INSTANCE;
 
 		Set<JavaClass> foundClasses = index.findClasses(newArrayList(new File("notAClassFile")));
 

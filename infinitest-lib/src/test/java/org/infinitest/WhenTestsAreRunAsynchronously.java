@@ -39,7 +39,9 @@ public class WhenTestsAreRunAsynchronously {
 
 	@Before
 	public void inContext() {
-		core = createAsyncCore(withChangedFiles(), withTests(FAILING_TEST, PASSING_TEST, TestJUnit4TestCase.class));
+		// core = createAsyncCore(withChangedFiles(), withTests(FAILING_TEST,
+		// PASSING_TEST, TestJUnit4TestCase.class));
+		core = createAsyncCore(withTests(FAILING_TEST, PASSING_TEST, TestJUnit4TestCase.class));
 		eventSupport = new EventSupport(5000);
 		core.addTestQueueListener(eventSupport);
 		core.addTestResultsListener(eventSupport);

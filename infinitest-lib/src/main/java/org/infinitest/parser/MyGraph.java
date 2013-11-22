@@ -35,7 +35,7 @@ public class MyGraph {
 	private final Map<String, Vertex> verticesByName;
 
 	private static class Vertex {
-		final JavaClass javaClass;
+		JavaClass javaClass;
 		final Set<Vertex> parents;
 		final Set<Vertex> children;
 
@@ -44,19 +44,19 @@ public class MyGraph {
 			this.parents = new HashSet<MyGraph.Vertex>();
 			this.children = new HashSet<MyGraph.Vertex>();
 		}
+
+		@Override
+		public String toString() {
+			return "Vertex " + javaClass + " parents: " + parents + " children: " + children;
+		}
 	}
 
 	public MyGraph() {
 		verticesByName = new HashMap<String, Vertex>();
-		clear();
 	}
 
 	public int size() {
 		return verticesByName.size();
-	}
-
-	public void clear() {
-		verticesByName.clear();
 	}
 
 	public Set<JavaClass> javaClasses() {
@@ -80,12 +80,17 @@ public class MyGraph {
 				return false;
 			}
 			// Reset
+			existing.javaClass = javaClass;
 			for (Vertex child : existing.children) {
 				child.parents.remove(existing);
 			}
 			existing.children.clear();
 			return true;
 		}
+	}
+
+	public void remove(JavaClass javaClass) {
+		verticesByName.remove(javaClass.getName());
 	}
 
 	public JavaClass findVertexByName(String name) {

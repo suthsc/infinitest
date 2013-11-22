@@ -31,7 +31,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.infinitest.CoreDependencySupport.*;
 import static org.junit.Assert.*;
 
-import org.infinitest.changedetect.*;
 import org.junit.*;
 
 public class WhenDetachingFromTheCore {
@@ -51,7 +50,7 @@ public class WhenDetachingFromTheCore {
 	@Test
 	public void shouldNoLongerRecieveEvents() {
 		ControlledEventQueue eventQueue = new ControlledEventQueue();
-		DefaultInfinitestCore core = createCore(new FakeChangeDetector(), withNoTestsToRun(), eventQueue);
+		DefaultInfinitestCore core = createCore(withNoTestsToRun(), eventQueue);
 		core.addTestQueueListener(listener);
 		core.reload();
 		eventQueue.flush();

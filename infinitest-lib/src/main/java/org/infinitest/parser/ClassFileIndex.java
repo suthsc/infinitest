@@ -30,76 +30,95 @@ package org.infinitest.parser;
 import java.io.*;
 import java.util.*;
 
+import javassist.*;
+
 import org.infinitest.*;
 
-import com.google.common.annotations.*;
+import com.google.common.io.*;
 
-public class ClassFileIndex {
-	private final JavaClassBuilder classBuilder;
-	private final MyGraph graph;
+public enum ClassFileIndex {
+	INSTANCE;
 
-	public ClassFileIndex(ClasspathProvider classpath) {
-		this(new JavaClassBuilder(classpath));
+	private ClassPool classPool;
+	private MyGraph graph;
+	private Map<File, JavaClass> classes;
+
+	private ClassFileIndex() {
+		clear();
 	}
 
-	@VisibleForTesting
-	ClassFileIndex(JavaClassBuilder classBuilder) {
-		this.classBuilder = classBuilder;
-		this.graph = new MyGraph();
+	public void clear() {
+		classPool = new ClassPool();
+		graph = new MyGraph();
+		classes = new HashMap<File, JavaClass>();
 	}
 
-	public Set<JavaClass> findClasses(Collection<File> changedFiles) {
-		// First update class index
-		List<String> changedClassesNames = new ArrayList<String>();
-		for (File changedFile : changedFiles) {
-			changedClassesNames.add(classBuilder.classFileChanged(changedFile));
-		}
-
-		// Create JavaClasses
+	public void parseAndIndex(Collection<File> changedFiles) {
 		Set<JavaClass> changedClasses = new HashSet<JavaClass>();
-		for (String changedClassesName : changedClassesNames) {
-			JavaClass javaClass = classBuilder.getClass(changedClassesName);
-			if (!(javaClass instanceof UnparsableClass)) {
-				changedClasses.add(javaClass);
+		for (File changedFile : changedFiles) {
+			Log.log("FileChanged : " + changedFile);
+
+			if (!changedFile.exists()) {
+				JavaClass old = classes.remove(changedFile);
+				if (old != null) {
+					graph.remove(old);
+				}
+			} else {
+				FileInputStream inputStream = null;
+				try {
+					inputStream = new FileInputStream(changedFile);
+
+					CtClass ctClass = classPool.makeClass(inputStream);
+					String className = ctClass.getName();
+
+					if (!unparsable(ctClass)) {
+						JavaAssistClass clazz = new JavaAssistClass(ctClass, changedFile);
+						changedClasses.add(clazz);
+						classes.put(changedFile, clazz);
+					}
+				} catch (IOException e) {
+					Log.log("ERROR " + e);
+					// Ignore
+				} finally {
+					if (inputStream != null) {
+						Closeables.closeQuietly(inputStream);
+					}
+				}
 			}
 		}
 
-		// Add to Index
+		Log.log("TOTAL CHANGES " + changedClasses.size());
+
+		Set<JavaClass> toLink = new HashSet<JavaClass>();
 		for (JavaClass changedClass : changedClasses) {
-			addToIndex(changedClass);
+			if (graph.addOrResetVertex(changedClass)) {
+				toLink.add(changedClass);
+			}
+		}
+
+		for (JavaClass changedClass : toLink) {
+			String[] imports = changedClass.getImports();
+			for (String className : imports) {
+				JavaClass childClass = graph.findVertexByName(className);
+				if (childClass != null) {
+					graph.addEdge(changedClass, childClass);
+				}
+			}
+		}
+	}
+
+	public Set<JavaClass> findClasses(Collection<File> changedFiles) {
+		Set<JavaClass> changedClasses = new HashSet<JavaClass>();
+		for (File changedFile : changedFiles) {
+			JavaClass javaClass = classes.get(changedFile);
+			if (javaClass != null) {
+				changedClasses.add(javaClass);
+			}
 		}
 
 		return changedClasses;
 	}
 
-	public JavaClass findOrCreateJavaClass(String classname) {
-		// Index by name
-		JavaClass jClass = graph.findVertexByName(classname);
-		if (jClass != null) {
-			return jClass;
-		}
-
-		JavaClass clazz = classBuilder.getClass(classname);
-		if (clazz.locatedInClassFile()) {
-			addToIndex(clazz);
-		}
-		return clazz;
-	}
-
-	private void addToIndex(JavaClass newClass) {
-		if (graph.addOrResetVertex(newClass)) {
-			Log.log("ADD EDGES : " + newClass);
-
-			for (String classname : newClass.getImports()) {
-				JavaClass childClass = findOrCreateJavaClass(classname);
-				graph.addEdge(newClass, childClass);
-			}
-		}
-	}
-
-	// Loop through all changed classes, adding their parents (and their
-	// parents)
-	// to another set of changed classes
 	public Set<JavaClass> findChangedParents(Set<JavaClass> classes) {
 		return graph.findParents(classes);
 	}
@@ -108,12 +127,11 @@ public class ClassFileIndex {
 		return graph.size();
 	}
 
-	public void clear() {
-		classBuilder.clear();
-		graph.clear();
-	}
-
 	public Set<JavaClass> getIndexedClasses() {
 		return graph.javaClasses();
+	}
+
+	private static boolean unparsable(CtClass cachedClass) {
+		return cachedClass.getClassFile2() == null;
 	}
 }

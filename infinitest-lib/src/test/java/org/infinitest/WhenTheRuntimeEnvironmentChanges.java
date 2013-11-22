@@ -35,7 +35,6 @@ import static org.mockito.Mockito.*;
 
 import java.util.*;
 
-import org.infinitest.changedetect.*;
 import org.infinitest.parser.*;
 import org.infinitest.testrunner.*;
 import org.junit.*;
@@ -43,7 +42,9 @@ import org.junit.*;
 public class WhenTheRuntimeEnvironmentChanges {
 	@Test
 	public void shouldTriggerACompleteReloadInTheCore() throws Exception {
-		InfinitestCore core = createCore(withNoChangedFiles(), withNoTestsToRun());
+		// InfinitestCore core = createCore(withNoChangedFiles(),
+		// withNoTestsToRun());
+		InfinitestCore core = createCore(withNoTestsToRun());
 		EventSupport eventSupport = new EventSupport();
 		core.addTestQueueListener(eventSupport);
 		core.setRuntimeEnvironment(fakeEnvironment());
@@ -55,11 +56,9 @@ public class WhenTheRuntimeEnvironmentChanges {
 		RuntimeEnvironment environment = fakeEnvironment();
 		TestRunner testRunner = mock(TestRunner.class);
 		TestDetector testDetector = mock(TestDetector.class);
-		ChangeDetector changeDetector = mock(ChangeDetector.class);
 
 		DefaultInfinitestCore core = new DefaultInfinitestCore(testRunner, new FakeEventQueue());
 		core.setTestDetector(testDetector);
-		core.setChangeDetector(changeDetector);
 		core.setRuntimeEnvironment(environment);
 
 		verify(testRunner).setRuntimeEnvironment(environment);
@@ -67,13 +66,14 @@ public class WhenTheRuntimeEnvironmentChanges {
 		verify(testRunner).setTestPriority(any(Comparator.class));
 		verify(testDetector).clear();
 		verify(testDetector).setClasspathProvider(environment);
-		verify(changeDetector).setClasspathProvider(environment);
-		verify(changeDetector).clear();
+		// verify(changeDetector).clear();
 	}
 
 	@Test
 	public void shouldDoNothingIfEnvironmentIsNotActuallyDifferent() throws Exception {
-		InfinitestCore core = createCore(withNoChangedFiles(), withNoTestsToRun());
+		// InfinitestCore core = createCore(withNoChangedFiles(),
+		// withNoTestsToRun());
+		InfinitestCore core = createCore(withNoTestsToRun());
 		EventSupport eventSupport = new EventSupport();
 		core.addTestQueueListener(eventSupport);
 		core.setRuntimeEnvironment(emptyRuntimeEnvironment());

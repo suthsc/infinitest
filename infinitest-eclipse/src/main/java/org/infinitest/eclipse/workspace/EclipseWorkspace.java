@@ -38,6 +38,7 @@ import java.util.*;
 
 import org.eclipse.core.runtime.*;
 import org.infinitest.*;
+import org.infinitest.changedetect.*;
 import org.infinitest.eclipse.*;
 import org.infinitest.eclipse.status.*;
 import org.infinitest.util.*;
@@ -71,6 +72,7 @@ class EclipseWorkspace implements WorkspaceFacade {
 			setStatus(workspaceErrors());
 		} else {
 			Log.log("<UPDATE PROJECTS> " + projectSet.projects().size());
+
 			int numberOfTestsToRun = updateProjectsIn(projectSet);
 			if (numberOfTestsToRun == 0) {
 				setStatus(noTestsRun());
@@ -93,6 +95,16 @@ class EclipseWorkspace implements WorkspaceFacade {
 
 	private int updateProjectsIn(ProjectSet projectSet) throws CoreException {
 		updateEvent.fire();
+
+		Set<File> roots = new HashSet<File>();
+		for (ProjectFacade project : projectSet.projects()) {
+			roots.addAll(buildRuntimeEnvironment(project).classDirectoriesInClasspath());
+		}
+
+		if (!FileChangeDetector.INSTANCE.refresh(roots)) {
+			return 0; // no changes
+		}
+
 		int totalTests = 0;
 		for (ProjectFacade project : projectSet.projects()) {
 			setStatus(findingTests(totalTests));

@@ -66,7 +66,7 @@ public class WhenClassesChange extends DependencyGraphTestBase {
 
 		assertThat(getGraph().getCurrentTests()).isEmpty();
 
-		javaClass = getGraph().findOrCreateJavaClass(testClass.getName());
+		// javaClass = getGraph().findOrCreateJavaClass(testClass.getName());
 		assertFalse(javaClass.isATest());
 	}
 

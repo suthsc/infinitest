@@ -31,7 +31,6 @@ import static com.google.common.base.Preconditions.*;
 
 import java.io.*;
 
-import org.infinitest.changedetect.*;
 import org.infinitest.filter.*;
 import org.infinitest.parser.*;
 import org.infinitest.testrunner.*;
@@ -68,7 +67,6 @@ public class InfinitestCoreBuilder {
 		runner.setConcurrencyController(controller);
 		DefaultInfinitestCore core = new DefaultInfinitestCore(runner, eventQueue);
 		core.setName(coreName);
-		core.setChangeDetector(new FileChangeDetector());
 		core.setTestDetector(createTestDetector(filterList));
 		core.setRuntimeEnvironment(runtimeEnvironment);
 		return core;

@@ -46,7 +46,6 @@ import org.infinitest.testrunner.queue.*;
 class DefaultInfinitestCore implements InfinitestCore {
 	private final TestRunner runner;
 	private TestDetector testDetector;
-	private ChangeDetector changeDetector;
 	private final Set<Class<? extends Throwable>> caughtExceptions;
 	private final EventNormalizer normalizer;
 	private RuntimeEnvironment currentEnvironment;
@@ -71,10 +70,6 @@ class DefaultInfinitestCore implements InfinitestCore {
 		this.testDetector = testDetector;
 	}
 
-	public void setChangeDetector(ChangeDetector changeDetector) {
-		this.changeDetector = changeDetector;
-	}
-
 	@Override
 	public synchronized int update(Collection<File> changedFiles) {
 		if (changedFiles.isEmpty()) {
@@ -93,7 +88,6 @@ class DefaultInfinitestCore implements InfinitestCore {
 	public synchronized int update() {
 		try {
 			Collection<File> findChangedClassFiles = findChangedClassFiles();
-			Log.log("<UPDATE FILES> " + findChangedClassFiles.size());
 			return update(findChangedClassFiles);
 		} catch (IOException e) {
 			checkForFatalError(e);
@@ -106,7 +100,6 @@ class DefaultInfinitestCore implements InfinitestCore {
 		Log.log("RELOAD " + name);
 		log("Reloading core " + name);
 		testDetector.clear();
-		changeDetector.clear();
 
 		fireReload();
 	}
@@ -116,7 +109,6 @@ class DefaultInfinitestCore implements InfinitestCore {
 		if ((currentEnvironment == null) || !environment.equals(currentEnvironment)) {
 			currentEnvironment = environment;
 			runner.setRuntimeEnvironment(environment);
-			changeDetector.setClasspathProvider(environment);
 			testDetector.setClasspathProvider(environment);
 			reload();
 		}
@@ -135,14 +127,9 @@ class DefaultInfinitestCore implements InfinitestCore {
 	}
 
 	private Collection<File> findChangedClassFiles() throws IOException {
-		if (changeDetector.filesWereRemoved()) {
-			// Instead of reloading the core when a file is removed,
-			// we should ask the test detector to remove it from the dependency
-			// graph
-			log("Files removed. Reloading " + name);
-			reload();
-		}
-		Collection<File> changedFiles = changeDetector.findChangedFiles();
+		List<File> classDirs = currentEnvironment.classDirectoriesInClasspath();
+
+		Collection<File> changedFiles = FileChangeDetector.INSTANCE.findChangedFiles(classDirs);
 		if (!changedFiles.isEmpty()) {
 			log(name + " Files changed: " + changedFiles);
 		}
@@ -229,6 +216,7 @@ class DefaultInfinitestCore implements InfinitestCore {
 			log("Fatal error occured while updating Error while updating", e);
 			throw new FatalInfinitestError("Error running tests", e);
 		}
+		Log.log(name + " Error while updating" + e);
 		log(name + " Error while updating", e);
 		reload();
 		caughtExceptions.add(e.getClass());

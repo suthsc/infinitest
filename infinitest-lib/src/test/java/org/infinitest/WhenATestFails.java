@@ -44,7 +44,9 @@ public class WhenATestFails extends ResultCollectorTestSupport {
 	@Before
 	public void inContext() {
 		eventQueue = new ControlledEventQueue();
-		core = createCore(withChangedFiles(), withTests(FAILING_TEST), eventQueue);
+		// core = createCore(withChangedFiles(), withTests(FAILING_TEST),
+		// eventQueue);
+		core = createCore(withTests(FAILING_TEST), eventQueue);
 		collector = new ResultCollector(core);
 	}
 

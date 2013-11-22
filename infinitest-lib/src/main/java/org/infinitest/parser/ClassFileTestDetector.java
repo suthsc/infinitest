@@ -42,7 +42,6 @@ import org.infinitest.filter.*;
  */
 public class ClassFileTestDetector implements TestDetector {
 	private final TestFilter filters;
-	private ClassFileIndex index;
 	private ClasspathProvider classpath;
 
 	public ClassFileTestDetector(TestFilter testFilterList) {
@@ -51,7 +50,7 @@ public class ClassFileTestDetector implements TestDetector {
 
 	@Override
 	public void clear() {
-		index.clear();
+		// ClassFileIndex.INSTANCE.clear();
 	}
 
 	/**
@@ -68,8 +67,8 @@ public class ClassFileTestDetector implements TestDetector {
 		}
 
 		// Find changed classes
-		Set<JavaClass> changedClasses = index.findClasses(changedFiles);
-		Set<JavaClass> changedParents = index.findChangedParents(changedClasses);
+		Set<JavaClass> changedClasses = ClassFileIndex.INSTANCE.findClasses(changedFiles);
+		Set<JavaClass> changedParents = ClassFileIndex.INSTANCE.findChangedParents(changedClasses);
 
 		// combine two sets
 		changedClasses.addAll(changedParents);
@@ -108,23 +107,18 @@ public class ClassFileTestDetector implements TestDetector {
 	}
 
 	public int size() {
-		return index.size();
-	}
-
-	public JavaClass findOrCreateJavaClass(String name) {
-		return index.findOrCreateJavaClass(name);
+		return ClassFileIndex.INSTANCE.size();
 	}
 
 	@Override
 	public void setClasspathProvider(ClasspathProvider classpath) {
 		this.classpath = classpath;
-		index = new ClassFileIndex(classpath);
 	}
 
 	@Override
 	public Set<String> getCurrentTests() {
 		Set<String> tests = newHashSet();
-		for (JavaClass javaClass : index.getIndexedClasses()) {
+		for (JavaClass javaClass : ClassFileIndex.INSTANCE.getIndexedClasses()) {
 			if (javaClass.isATest() && !filters.match(javaClass) && inCurrentProject(javaClass)) {
 				tests.add(javaClass.getName());
 			}

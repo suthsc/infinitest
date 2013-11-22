@@ -29,27 +29,25 @@ package org.infinitest;
 
 import static org.infinitest.CoreDependencySupport.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 import java.io.*;
 
-import org.infinitest.changedetect.*;
 import org.junit.*;
 
 public class WhenCoreFailsWhileUpdating {
 	private InfinitestCore core;
 	private StubTestDetector testDetector;
-	private ChangeDetector changeDetector;
 
 	@Before
 	public void inContext() throws IOException {
-		changeDetector = mock(ChangeDetector.class);
-		when(changeDetector.findChangedFiles()).thenThrow(new IOException());
-
-		changeDetector.clear();
+		// changeDetector = mock(ChangeDetector.class);
+		// when(changeDetector.findChangedFiles(any(File.class))).thenThrow(new
+		// IOException());
+		//
+		// changeDetector.clear();
 
 		testDetector = new StubTestDetector();
-		core = createCore(changeDetector, testDetector);
+		core = createCore(testDetector);
 	}
 
 	@Test

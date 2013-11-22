@@ -1,6 +1,0 @@
-#
-#Fri Nov 22 14:13:41 CET 2013
-testNumber1.callcount=1
-setUp.callcount=2
-tearDown.callcount=2
-testNumber2.callcount=1

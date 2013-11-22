@@ -28,20 +28,17 @@
 package org.infinitest;
 
 import static org.infinitest.testrunner.TestRunnerMother.*;
-import static org.infinitest.util.InfinitestTestUtils.*;
 import static org.junit.Assume.*;
 import static org.mockito.Mockito.*;
 
 import java.io.*;
 import java.util.*;
 
-import org.infinitest.changedetect.*;
 import org.infinitest.parser.*;
 import org.infinitest.testrunner.*;
 import org.infinitest.util.*;
 import org.junit.*;
 
-import com.fakeco.fakeproduct.*;
 import com.fakeco.fakeproduct.simple.*;
 import com.fakeco.fakeproduct.simple.FailingTest;
 
@@ -89,39 +86,18 @@ public class CoreDependencySupport {
 		return mock(TestDetector.class);
 	}
 
-	public static ChangeDetector withChangedFiles(Class<?>... changedClasses) {
-		if (changedClasses.length == 0) {
-			createChangeDetector(new Class<?>[] { TestFakeProduct.class });
-		}
-		return createChangeDetector(changedClasses);
+	static DefaultInfinitestCore createCore(TestDetector tests) {
+		return createCore(tests, new FakeEventQueue());
 	}
 
-	private static ChangeDetector createChangeDetector(Class<?>... changedClasses) {
-		Set<File> changedFiles = new HashSet<File>();
-		for (Class<?> each : changedClasses) {
-			changedFiles.add(getFileForClass(each));
-		}
-		return new FakeChangeDetector(changedFiles, false);
-	}
-
-	public static ChangeDetector withNoChangedFiles() {
-		return createChangeDetector();
-	}
-
-	static DefaultInfinitestCore createCore(ChangeDetector changedFiles, TestDetector tests) {
-		return createCore(changedFiles, tests, new FakeEventQueue());
-	}
-
-	static DefaultInfinitestCore createCore(ChangeDetector changedFiles, TestDetector tests, EventQueue eventQueue) {
+	static DefaultInfinitestCore createCore(TestDetector tests, EventQueue eventQueue) {
 		DefaultInfinitestCore core = new DefaultInfinitestCore(new InProcessRunner(), eventQueue);
-		core.setChangeDetector(changedFiles);
 		core.setTestDetector(tests);
 		return core;
 	}
 
-	static DefaultInfinitestCore createAsyncCore(ChangeDetector changeDetector, TestDetector testDetector) {
+	static DefaultInfinitestCore createAsyncCore(TestDetector testDetector) {
 		DefaultInfinitestCore core = new DefaultInfinitestCore(createRunner(), new FakeEventQueue());
-		core.setChangeDetector(changeDetector);
 		core.setTestDetector(testDetector);
 		return core;
 	}

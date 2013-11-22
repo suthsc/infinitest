@@ -27,9 +27,10 @@
  */
 package org.infinitest;
 
-import static com.google.common.collect.Lists.*;
 import static com.google.common.collect.Sets.*;
-import static org.junit.Assert.*;
+import static java.util.Arrays.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.*;
@@ -40,35 +41,29 @@ import org.infinitest.testrunner.*;
 import org.junit.*;
 
 public class WhenTriggeringACoreUpdate {
-	private List<File> updatedFiles;
 	private DefaultInfinitestCore core;
 	private TestDetector testDetector;
 
 	@Before
 	public void inContext() {
-		updatedFiles = newArrayList();
-		core = new DefaultInfinitestCore(mock(TestRunner.class), new ControlledEventQueue());
 		testDetector = mock(TestDetector.class);
-		when(testDetector.getCurrentTests()).thenReturn(Collections.<String> emptySet());
-		core.setTestDetector(testDetector);
-	}
 
-	private void testsToExpect(JavaClass... tests) {
-		when(testDetector.findTestsToRun(updatedFiles)).thenReturn(newHashSet(tests));
+		core = new DefaultInfinitestCore(mock(TestRunner.class), new ControlledEventQueue());
+		core.setTestDetector(testDetector);
 	}
 
 	@Test
 	public void canUseAKnownListOfChangedFilesToReduceFileSystemAccess() {
-		testsToExpect();
-		core.update(updatedFiles);
+		core.update(asList(new File("changed.class")));
 	}
 
 	@Test
 	public void shouldReturnTheNumberOfTestsRun() {
 		JavaClass javaClass = mock(JavaClass.class);
+		when(testDetector.findTestsToRun(any(List.class))).thenReturn(newHashSet(javaClass));
 
-		testsToExpect(javaClass);
+		int testCount = core.update(asList(new File("changed.class")));
 
-		assertEquals(1, core.update(updatedFiles));
+		assertThat(testCount).isEqualTo(1);
 	}
 }
