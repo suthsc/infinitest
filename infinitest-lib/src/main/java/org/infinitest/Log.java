@@ -31,12 +31,12 @@ import java.io.*;
 
 public class Log {
 	public static void log(String message) {
-		try {
-			FileWriter fileWriter = new FileWriter(new File("/Users/dgageot/Desktop/log"), true);
-			PrintWriter printWriter = new PrintWriter(fileWriter);
-			printWriter.println(message);
-			printWriter.close();
-		} catch (Throwable e) {
-		}
+		// try {
+		// 	FileWriter fileWriter = new FileWriter(new File("/Users/dgageot/Desktop/log"), true);
+		// 	PrintWriter printWriter = new PrintWriter(fileWriter);
+		// 	printWriter.println(message);
+		// 	printWriter.close();
+		// } catch (Throwable e) {
+		// }
 	}
 }
