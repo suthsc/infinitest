@@ -34,7 +34,7 @@ find . -name "*.xml" | xargs perl -pi -e "s/${CURRENT}-SNAPSHOT/${CURRENT}/g"
 git commit -am "VERSION${CURRENT} - ${release_message}"
 
 # Build it!
-mvn clean install
+mvn clean install -DskipTests
 if [ "$?" -ne 0 ]; then
 	echo "ERROR> Maven build failed aborting."
 	git reset --hard HEAD~1
