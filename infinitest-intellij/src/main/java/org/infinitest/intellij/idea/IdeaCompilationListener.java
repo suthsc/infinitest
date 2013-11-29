@@ -27,6 +27,9 @@
  */
 package org.infinitest.intellij.idea;
 
+import java.io.*;
+import java.util.*;
+
 import org.infinitest.*;
 import org.infinitest.intellij.*;
 
@@ -78,6 +81,6 @@ public class IdeaCompilationListener implements CompilationStatusListener, TestC
 		}
 
 		core.setRuntimeEnvironment(runtimeEnvironment);
-		core.update();
+		core.update(new ArrayList<File>());
 	}
 }

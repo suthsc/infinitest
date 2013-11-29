@@ -38,9 +38,9 @@ import java.util.*;
 
 import org.eclipse.core.runtime.*;
 import org.infinitest.*;
-import org.infinitest.changedetect.*;
 import org.infinitest.eclipse.*;
 import org.infinitest.eclipse.status.*;
+import org.infinitest.parser.*;
 import org.infinitest.util.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
@@ -67,13 +67,13 @@ class EclipseWorkspace implements WorkspaceFacade {
 	}
 
 	@Override
-	public void updateProjects() throws CoreException {
+	public void updateProjects(Collection<File> changedFiles) throws CoreException {
 		if (projectSet.hasErrors()) {
 			setStatus(workspaceErrors());
 		} else {
 			Log.log("<UPDATE PROJECTS> " + projectSet.projects().size());
 
-			int numberOfTestsToRun = updateProjectsIn(projectSet);
+			int numberOfTestsToRun = updateProjectsIn(projectSet, changedFiles);
 			if (numberOfTestsToRun == 0) {
 				setStatus(noTestsRun());
 			}
@@ -93,34 +93,27 @@ class EclipseWorkspace implements WorkspaceFacade {
 		return status;
 	}
 
-	private int updateProjectsIn(ProjectSet projectSet) throws CoreException {
+	private int updateProjectsIn(ProjectSet projectSet, Collection<File> changedFiles) throws CoreException {
 		updateEvent.fire();
 
-		Set<File> roots = new HashSet<File>();
-		for (ProjectFacade project : projectSet.projects()) {
-			roots.addAll(buildRuntimeEnvironment(project).classDirectoriesInClasspath());
-		}
-
-		if (!FileChangeDetector.INSTANCE.refresh(roots)) {
-			return 0; // no changes
-		}
+		ClassFileIndex.INSTANCE.parseAndIndex(changedFiles);
 
 		int totalTests = 0;
 		for (ProjectFacade project : projectSet.projects()) {
 			setStatus(findingTests(totalTests));
-			totalTests += updateProject(project);
+			totalTests += updateProject(project, changedFiles);
 		}
 		return totalTests;
 	}
 
-	private int updateProject(ProjectFacade project) throws CoreException {
+	private int updateProject(ProjectFacade project, Collection<File> changedFiles) throws CoreException {
 		RuntimeEnvironment environment = buildRuntimeEnvironment(project);
 		InfinitestCore core = coreRegistry.getCore(project.getLocationURI());
 		if (core == null) {
 			core = createCore(project, environment);
 		}
 		core.setRuntimeEnvironment(environment);
-		return core.update();
+		return core.update(changedFiles);
 	}
 
 	public RuntimeEnvironment buildRuntimeEnvironment(ProjectFacade project) throws CoreException {

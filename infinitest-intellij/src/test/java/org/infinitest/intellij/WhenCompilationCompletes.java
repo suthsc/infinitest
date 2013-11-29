@@ -27,7 +27,11 @@
  */
 package org.infinitest.intellij;
 
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
+
+import java.io.*;
+import java.util.*;
 
 import org.infinitest.*;
 import org.infinitest.intellij.idea.*;
@@ -51,7 +55,7 @@ public class WhenCompilationCompletes {
 		listener.compilationFinished(false, 0, 0, null);
 
 		verify(core).setRuntimeEnvironment(Matchers.any(RuntimeEnvironment.class));
-		verify(core).update();
+		core.update(new ArrayList<File>());
 	}
 
 	@Test
@@ -60,7 +64,7 @@ public class WhenCompilationCompletes {
 		listener.compilationFinished(true, 0, 0, null);
 
 		verify(core, never()).setRuntimeEnvironment(Matchers.any(RuntimeEnvironment.class));
-		verify(core, never()).update();
+		verify(core, never()).update(any(List.class));
 	}
 
 	@Test
@@ -69,6 +73,6 @@ public class WhenCompilationCompletes {
 		listener.compilationFinished(false, 1, 0, null);
 
 		verify(core, never()).setRuntimeEnvironment(Matchers.any(RuntimeEnvironment.class));
-		verify(core, never()).update();
+		verify(core, never()).update(any(List.class));
 	}
 }

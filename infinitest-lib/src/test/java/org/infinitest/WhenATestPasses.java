@@ -30,6 +30,9 @@ package org.infinitest;
 import static org.infinitest.CoreDependencySupport.*;
 import static org.junit.Assert.*;
 
+import java.io.*;
+import java.util.*;
+
 import org.junit.*;
 
 public class WhenATestPasses {
@@ -43,7 +46,7 @@ public class WhenATestPasses {
 		EventSupport testStatus = new EventSupport();
 		core.addTestResultsListener(testStatus);
 
-		core.update();
+		core.update(new ArrayList<File>());
 		eventQueue.flush();
 
 		testStatus.assertTestsStarted(PASSING_TEST);

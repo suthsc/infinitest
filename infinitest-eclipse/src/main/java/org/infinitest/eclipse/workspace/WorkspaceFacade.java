@@ -27,8 +27,11 @@
  */
 package org.infinitest.eclipse.workspace;
 
+import java.io.*;
+import java.util.*;
+
 import org.eclipse.core.runtime.*;
 
 public interface WorkspaceFacade {
-	void updateProjects() throws CoreException;
+	void updateProjects(Collection<File> changedFiles) throws CoreException;
 }

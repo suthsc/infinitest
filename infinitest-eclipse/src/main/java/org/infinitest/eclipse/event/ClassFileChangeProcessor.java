@@ -29,6 +29,9 @@ package org.infinitest.eclipse.event;
 
 import static org.eclipse.core.resources.IResourceChangeEvent.*;
 
+import java.io.*;
+import java.util.*;
+
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 import org.infinitest.eclipse.workspace.*;
@@ -52,22 +55,31 @@ class ClassFileChangeProcessor extends EclipseEventProcessor {
 
 	@Override
 	public void processEvent(IResourceChangeEvent event) throws CoreException {
-		if (containsClassFileChanges(getDeltas(event))) {
-			workspace.updateProjects();
+		List<File> changedClasses = getChangedClasses(getDeltas(event));
+
+		if (!changedClasses.isEmpty()) {
+			workspace.updateProjects(changedClasses);
 		}
 	}
 
-	private boolean containsClassFileChanges(IResourceDelta... deltas) {
-		// DEBT SHould use IResourceDeltaVisitor instead
+	private List<File> getChangedClasses(IResourceDelta... deltas) throws CoreException {
+		final List<File> changedClasses = new ArrayList<File>();
 		for (IResourceDelta delta : deltas) {
-			if (isClassFile(delta) || containsClassFileChanges(delta.getAffectedChildren())) {
-				return true;
-			}
+			delta.accept(new IResourceDeltaVisitor() {
+				@Override
+				public boolean visit(IResourceDelta child) {
+					addFile(changedClasses, child);
+					return true;
+				}
+			});
 		}
-		return false;
+		return changedClasses;
 	}
 
-	private boolean isClassFile(IResourceDelta delta) {
-		return delta.getFullPath().toPortableString().endsWith(".class");
+	private static void addFile(List<File> changedClasses, IResourceDelta child) {
+		String extension = child.getFullPath().getFileExtension();
+		if ("class".equals(extension)) {
+			changedClasses.add(child.getResource().getRawLocation().makeAbsolute().toFile());
+		}
 	}
 }

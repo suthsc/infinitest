@@ -29,6 +29,9 @@ package org.infinitest;
 
 import static org.infinitest.CoreDependencySupport.*;
 
+import java.io.*;
+import java.util.*;
+
 import org.junit.*;
 
 public class WhenAnErrorOccurs {
@@ -55,17 +58,17 @@ public class WhenAnErrorOccurs {
 	public void shouldReloadIndexOnIOException() throws Exception {
 		EventSupport statusSupport = new EventSupport();
 		core.addTestQueueListener(statusSupport);
-		core.update();
+		core.update(new ArrayList<File>());
 		shouldFail = false;
-		core.update();
+		core.update(new ArrayList<File>());
 		shouldFail = true;
-		core.update();
+		core.update(new ArrayList<File>());
 		statusSupport.assertReloadOccured();
 	}
 
 	@Test(expected = FatalInfinitestError.class)
 	public void shouldNotRetryIfErrorOccursTwiceInARow() {
-		core.update();
-		core.update();
+		core.update(new ArrayList<File>());
+		core.update(new ArrayList<File>());
 	}
 }

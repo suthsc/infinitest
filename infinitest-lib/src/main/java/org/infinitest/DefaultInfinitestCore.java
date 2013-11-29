@@ -35,7 +35,6 @@ import static org.infinitest.util.InfinitestUtils.*;
 import java.io.*;
 import java.util.*;
 
-import org.infinitest.changedetect.*;
 import org.infinitest.parser.*;
 import org.infinitest.testrunner.*;
 import org.infinitest.testrunner.queue.*;
@@ -82,19 +81,6 @@ class DefaultInfinitestCore implements InfinitestCore {
 		return testsRun;
 	}
 
-	// If this returned the number of tests that were scheduled to be run, we
-	// could warn the user when they make changes that don't trigger tests
-	@Override
-	public synchronized int update() {
-		try {
-			Collection<File> findChangedClassFiles = findChangedClassFiles();
-			return update(findChangedClassFiles);
-		} catch (IOException e) {
-			checkForFatalError(e);
-		}
-		return 0;
-	}
-
 	@Override
 	public void reload() {
 		Log.log("RELOAD " + name);
@@ -124,16 +110,6 @@ class DefaultInfinitestCore implements InfinitestCore {
 			runTests(testsToRun);
 		}
 		return testsToRun.size();
-	}
-
-	private Collection<File> findChangedClassFiles() throws IOException {
-		List<File> classDirs = currentEnvironment.classDirectoriesInClasspath();
-
-		Collection<File> changedFiles = FileChangeDetector.INSTANCE.findChangedFiles(classDirs);
-		if (!changedFiles.isEmpty()) {
-			log(name + " Files changed: " + changedFiles);
-		}
-		return changedFiles;
 	}
 
 	public RunStatistics getRunStatistics() {

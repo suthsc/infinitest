@@ -33,6 +33,9 @@ import static org.infinitest.testrunner.TestEvent.*;
 import static org.infinitest.util.InfinitestTestUtils.*;
 import static org.junit.Assert.*;
 
+import java.io.*;
+import java.util.*;
+
 import org.infinitest.testrunner.*;
 import org.junit.*;
 
@@ -70,7 +73,7 @@ public class WhenATestFails extends ResultCollectorTestSupport {
 				testCaseEvent = event;
 			}
 		});
-		core.update();
+		core.update(new ArrayList<File>());
 		eventQueue.flush();
 
 		assertTrue(core.isEventSourceFor(testCaseEvent));
@@ -83,7 +86,7 @@ public class WhenATestFails extends ResultCollectorTestSupport {
 	public void shouldFireFailureEvents() {
 		EventSupport eventSupport = new EventSupport();
 		core.addTestResultsListener(eventSupport);
-		core.update();
+		core.update(new ArrayList<File>());
 		eventQueue.flush();
 		eventSupport.assertTestsStarted(FAILING_TEST);
 		eventSupport.assertTestFailed(FAILING_TEST);

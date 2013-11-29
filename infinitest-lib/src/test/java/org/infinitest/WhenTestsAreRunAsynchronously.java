@@ -29,6 +29,9 @@ package org.infinitest;
 
 import static org.infinitest.CoreDependencySupport.*;
 
+import java.io.*;
+import java.util.*;
+
 import org.junit.*;
 
 import com.fakeco.fakeproduct.*;
@@ -52,11 +55,11 @@ public class WhenTestsAreRunAsynchronously {
 
 	@Test
 	public void canUpdateWhileTestsAreRunning() throws Exception {
-		core.update();
+		core.update(new ArrayList<File>());
 		eventSupport.assertQueueChanges(1);
 		// There are three tests in the queue, we're updating before they're all
 		// finished
-		core.update();
+		core.update(new ArrayList<File>());
 
 		eventSupport.assertQueueChanges(3);
 		eventSupport.assertRunComplete();

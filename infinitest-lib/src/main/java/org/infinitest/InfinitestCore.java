@@ -59,19 +59,6 @@ public interface InfinitestCore {
 	void removeDisabledTestListener(DisabledTestListener listener);
 
 	/**
-	 * Tell the core to look for changes to class files and run tests as
-	 * appropriate. This call is asynchronous. Events will be fired to publish
-	 * results. If a test run is in progress, new tests will be added to the
-	 * current queue.
-	 * <p/>
-	 * 
-	 * This method should always be called from the main UI event queue thread.
-	 * 
-	 * @see EventQueue
-	 */
-	int update();
-
-	/**
 	 * Uses a list of changed files instead of searching for them
 	 */
 	int update(Collection<File> changedFiles);

@@ -31,6 +31,7 @@ import static org.infinitest.CoreDependencySupport.*;
 import static org.junit.Assert.*;
 
 import java.io.*;
+import java.util.*;
 
 import org.junit.*;
 
@@ -52,7 +53,7 @@ public class WhenCoreFailsWhileUpdating {
 
 	@Test
 	public void shouldIgnoreFailureAndReloadIndex() {
-		core.update();
+		core.update(new ArrayList<File>());
 		assertTrue(testDetector.isCleared());
 	}
 }

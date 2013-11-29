@@ -85,7 +85,7 @@ public class WhenUpdatingTheProjectsInTheWorkspace extends ResourceEventSupport 
 		URI projectAUri = projectAUri();
 		when(coreRegistry.getCore(projectAUri)).thenReturn(null);
 
-		workspace.updateProjects();
+		workspace.updateProjects(new ArrayList<File>());
 
 		assertStatusIs(noTestsRun());
 		verify(coreRegistry).addCore(eq(projectAUri), any(InfinitestCore.class));
@@ -102,7 +102,7 @@ public class WhenUpdatingTheProjectsInTheWorkspace extends ResourceEventSupport 
 			}
 		});
 
-		workspace.updateProjects();
+		workspace.updateProjects(new ArrayList<File>());
 		assertEquals(1, updates);
 		verify(core).setRuntimeEnvironment(any(RuntimeEnvironment.class));
 	}
@@ -111,7 +111,7 @@ public class WhenUpdatingTheProjectsInTheWorkspace extends ResourceEventSupport 
 	public void shouldUpdateCoreOnAutoBuild() throws CoreException {
 		InfinitestCore core = prepateCore(projectAUri(), 10);
 
-		workspace.updateProjects();
+		workspace.updateProjects(new ArrayList<File>());
 
 		assertStatusIs(findingTests(0));
 		verify(core).setRuntimeEnvironment(any(RuntimeEnvironment.class));
@@ -120,7 +120,7 @@ public class WhenUpdatingTheProjectsInTheWorkspace extends ResourceEventSupport 
 
 	private InfinitestCore prepateCore(URI projectAUri, int numberOfTestsRun) {
 		InfinitestCore core = mock(InfinitestCore.class);
-		when(core.update()).thenReturn(numberOfTestsRun);
+		when(core.update(any(List.class))).thenReturn(numberOfTestsRun);
 		when(coreRegistry.getCore(projectAUri)).thenReturn(core);
 		return core;
 	}
@@ -129,7 +129,7 @@ public class WhenUpdatingTheProjectsInTheWorkspace extends ResourceEventSupport 
 	public void shouldSetAppropriateStatusIfNoTestsWereRun() throws CoreException {
 		InfinitestCore core = prepateCore(projectAUri(), 0);
 
-		workspace.updateProjects();
+		workspace.updateProjects(new ArrayList<File>());
 
 		assertStatusIs(noTestsRun());
 		verify(core).setRuntimeEnvironment(any(RuntimeEnvironment.class));
@@ -139,7 +139,7 @@ public class WhenUpdatingTheProjectsInTheWorkspace extends ResourceEventSupport 
 	public void shouldSetWarningStatusIfNoTestsAreRun() throws CoreException {
 		projects.clear();
 
-		workspace.updateProjects();
+		workspace.updateProjects(new ArrayList<File>());
 
 		assertStatusIs(noTestsRun());
 	}
@@ -154,7 +154,7 @@ public class WhenUpdatingTheProjectsInTheWorkspace extends ResourceEventSupport 
 			}
 		});
 
-		workspace.updateProjects();
+		workspace.updateProjects(new ArrayList<File>());
 		assertThat(updatedStatus, equalsStatus(noTestsRun()));
 	}
 
@@ -168,7 +168,7 @@ public class WhenUpdatingTheProjectsInTheWorkspace extends ResourceEventSupport 
 		InfinitestCore coreA = prepateCore(projectAUri(), 10);
 		InfinitestCore coreB = prepateCore(projectBUri, 10);
 
-		workspace.updateProjects();
+		workspace.updateProjects(new ArrayList<File>());
 		verify(coreA).setRuntimeEnvironment(any(RuntimeEnvironment.class));
 		verify(coreB).setRuntimeEnvironment(any(RuntimeEnvironment.class));
 	}

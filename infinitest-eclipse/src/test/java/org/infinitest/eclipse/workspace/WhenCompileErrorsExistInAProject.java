@@ -33,6 +33,7 @@ import static org.infinitest.eclipse.workspace.WorkspaceStatusFactory.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.*;
 import java.util.*;
 
 import org.eclipse.core.runtime.*;
@@ -67,7 +68,7 @@ public class WhenCompileErrorsExistInAProject extends ResourceEventSupport {
 		projects.clear();
 		projects.add(new ProjectFacade(project));
 
-		workspace.updateProjects();
+		workspace.updateProjects(new ArrayList<File>());
 
 		assertStatusIs(workspaceErrors());
 

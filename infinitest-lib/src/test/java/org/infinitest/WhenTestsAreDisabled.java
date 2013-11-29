@@ -34,6 +34,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.io.*;
 import java.util.*;
 
 import org.infinitest.parser.*;
@@ -60,7 +61,7 @@ public class WhenTestsAreDisabled {
 				disabledTestList.addAll(testName);
 			}
 		});
-		core.update();
+		core.update(new ArrayList<File>());
 		assertEquals("MyClass", getOnlyElement(disabledTestList));
 	}
 }
