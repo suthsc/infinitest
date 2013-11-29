@@ -58,7 +58,7 @@ public class ClassFileTestDetector implements TestDetector {
 	 * of tests that need to be run.
 	 */
 	@Override
-	public synchronized Set<JavaClass> findTestsToRun(Collection<File> changedFiles) {
+	public synchronized Set<JavaClass> findTestsToRun(Set<JavaClass> allChangedClasses) {
 		filters.updateFilterList();
 		if (filters.acceptsNone()) {
 			return new HashSet<JavaClass>(); // No need to do anything for
@@ -66,17 +66,7 @@ public class ClassFileTestDetector implements TestDetector {
 												// catch all filter
 		}
 
-		// Find changed classes
-		Set<JavaClass> changedClasses = ClassFileIndex.INSTANCE.findClasses(changedFiles);
-		Set<JavaClass> changedParents = ClassFileIndex.INSTANCE.findChangedParents(changedClasses);
-
-		// combine two sets
-		changedClasses.addAll(changedParents);
-
-		// run through total set, and pick out tests to run
-		log(Level.FINE, "Total changeset: " + changedParents);
-		Log.log("Total changeset: " + changedParents);
-		return filterTests(changedClasses);
+		return filterTests(allChangedClasses);
 	}
 
 	private Set<JavaClass> filterTests(Set<JavaClass> changedClasses) {

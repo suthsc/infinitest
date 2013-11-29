@@ -29,6 +29,7 @@ package org.infinitest.eclipse.event;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
+import org.infinitest.*;
 import org.infinitest.eclipse.trim.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
@@ -55,7 +56,8 @@ class SaveDetector extends EclipseEventProcessor {
 	}
 
 	@Override
-	public void processEvent(IResourceChangeEvent event) throws CoreException {
+	public void processEvent(IResourceChangeEvent event) {
+		Log.log("SAVE");
 		saveListener.filesSaved();
 	}
 }

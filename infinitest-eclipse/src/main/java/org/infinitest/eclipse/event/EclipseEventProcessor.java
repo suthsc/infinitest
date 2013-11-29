@@ -44,8 +44,4 @@ public abstract class EclipseEventProcessor {
 	public abstract boolean canProcessEvent(IResourceChangeEvent event);
 
 	public abstract void processEvent(IResourceChangeEvent event) throws CoreException;
-
-	protected IResourceDelta[] getDeltas(IResourceChangeEvent event) {
-		return event.getDelta().getAffectedChildren();
-	}
 }

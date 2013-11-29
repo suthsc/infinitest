@@ -27,9 +27,9 @@
  */
 package org.infinitest;
 
-import java.io.*;
 import java.util.*;
 
+import org.infinitest.parser.*;
 import org.infinitest.testrunner.*;
 
 /**
@@ -61,7 +61,7 @@ public interface InfinitestCore {
 	/**
 	 * Uses a list of changed files instead of searching for them
 	 */
-	int update(Collection<File> changedFiles);
+	int update(Set<JavaClass> changedClasses);
 
 	/**
 	 * Re-indexes all the classes in the output directory and re-runs all the

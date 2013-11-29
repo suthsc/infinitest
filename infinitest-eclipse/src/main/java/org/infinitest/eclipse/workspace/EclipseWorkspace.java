@@ -94,26 +94,36 @@ class EclipseWorkspace implements WorkspaceFacade {
 	}
 
 	private int updateProjectsIn(ProjectSet projectSet, Collection<File> changedFiles) throws CoreException {
-		updateEvent.fire();
-
 		ClassFileIndex.INSTANCE.parseAndIndex(changedFiles);
+
+		// Find changed classes
+		Set<JavaClass> changedClasses = ClassFileIndex.INSTANCE.findClasses(changedFiles);
+		Set<JavaClass> changedParents = ClassFileIndex.INSTANCE.findChangedParents(changedClasses);
+
+		// combine two sets
+		changedClasses.addAll(changedParents);
+
+		// run through total set, and pick out tests to run
+		Log.log("Total changeset: " + changedParents);
+
+		updateEvent.fire();
 
 		int totalTests = 0;
 		for (ProjectFacade project : projectSet.projects()) {
 			setStatus(findingTests(totalTests));
-			totalTests += updateProject(project, changedFiles);
+			totalTests += updateProject(project, changedClasses);
 		}
 		return totalTests;
 	}
 
-	private int updateProject(ProjectFacade project, Collection<File> changedFiles) throws CoreException {
+	private int updateProject(ProjectFacade project, Set<JavaClass> changedClasses) throws CoreException {
 		RuntimeEnvironment environment = buildRuntimeEnvironment(project);
 		InfinitestCore core = coreRegistry.getCore(project.getLocationURI());
 		if (core == null) {
 			core = createCore(project, environment);
 		}
 		core.setRuntimeEnvironment(environment);
-		return core.update(changedFiles);
+		return core.update(changedClasses);
 	}
 
 	public RuntimeEnvironment buildRuntimeEnvironment(ProjectFacade project) throws CoreException {

@@ -34,6 +34,7 @@ import java.util.*;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
+import org.infinitest.*;
 import org.infinitest.eclipse.workspace.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
@@ -55,24 +56,22 @@ class ClassFileChangeProcessor extends EclipseEventProcessor {
 
 	@Override
 	public void processEvent(IResourceChangeEvent event) throws CoreException {
-		List<File> changedClasses = getChangedClasses(getDeltas(event));
-
+		List<File> changedClasses = getChangedClasses(event.getDelta());
 		if (!changedClasses.isEmpty()) {
+			Log.log("ClassFileChangeProcessor: " + changedClasses);
 			workspace.updateProjects(changedClasses);
 		}
 	}
 
-	private List<File> getChangedClasses(IResourceDelta... deltas) throws CoreException {
+	private List<File> getChangedClasses(IResourceDelta delta) throws CoreException {
 		final List<File> changedClasses = new ArrayList<File>();
-		for (IResourceDelta delta : deltas) {
-			delta.accept(new IResourceDeltaVisitor() {
-				@Override
-				public boolean visit(IResourceDelta child) {
-					addFile(changedClasses, child);
-					return true;
-				}
-			});
-		}
+		delta.accept(new IResourceDeltaVisitor() {
+			@Override
+			public boolean visit(IResourceDelta child) {
+				addFile(changedClasses, child);
+				return true;
+			}
+		});
 		return changedClasses;
 	}
 

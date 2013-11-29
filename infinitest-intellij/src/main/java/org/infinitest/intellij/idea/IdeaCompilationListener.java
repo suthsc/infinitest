@@ -27,13 +27,12 @@
  */
 package org.infinitest.intellij.idea;
 
-import java.io.*;
-import java.util.*;
-
 import org.infinitest.*;
 import org.infinitest.intellij.*;
+import org.infinitest.parser.*;
 
 import com.intellij.openapi.compiler.*;
+import com.intellij.util.containers.hash.*;
 
 public class IdeaCompilationListener implements CompilationStatusListener, TestControl {
 	private final InfinitestCore core;
@@ -81,6 +80,6 @@ public class IdeaCompilationListener implements CompilationStatusListener, TestC
 		}
 
 		core.setRuntimeEnvironment(runtimeEnvironment);
-		core.update(new ArrayList<File>());
+		core.update(new HashSet<JavaClass>());
 	}
 }

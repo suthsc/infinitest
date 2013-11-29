@@ -27,22 +27,26 @@
  */
 package org.infinitest;
 
-import java.io.*;
 import java.util.*;
 
+import org.infinitest.parser.*;
 import org.infinitest.testrunner.*;
 
 @SuppressWarnings("all")
 public class FakeInfinitestCore implements InfinitestCore {
+	@Override
 	public void addTestQueueListener(TestQueueListener listener) {
 	}
 
+	@Override
 	public void removeTestQueueListener(TestQueueListener listener) {
 	}
 
+	@Override
 	public void addTestResultsListener(TestResultsListener listener) {
 	}
 
+	@Override
 	public void removeTestResultsListener(TestResultsListener listener) {
 	}
 
@@ -50,41 +54,51 @@ public class FakeInfinitestCore implements InfinitestCore {
 		return 0;
 	}
 
+	@Override
 	public void reload() {
 	}
 
+	@Override
 	public void setRuntimeEnvironment(RuntimeEnvironment environment) {
 	}
 
+	@Override
 	public String getName() {
 		return null;
 	}
 
+	@Override
 	public void addConsoleOutputListener(ConsoleOutputListener listener) {
 	}
 
+	@Override
 	public void removeConsoleOutputListener(ConsoleOutputListener listener) {
 	}
 
 	public void addReloadListener(ReloadListener listener) {
 	}
 
+	@Override
 	public void addDisabledTestListener(DisabledTestListener listener) {
 	}
 
+	@Override
 	public void removeDisabledTestListener(DisabledTestListener anyObject) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public RuntimeEnvironment getRuntimeEnvironment() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean isEventSourceFor(TestCaseEvent testCaseEvent) {
 		throw new UnsupportedOperationException();
 	}
 
-	public int update(Collection<File> changedFiles) {
+	@Override
+	public int update(Set<JavaClass> changedClasses) {
 		throw new UnsupportedOperationException();
 	}
 }

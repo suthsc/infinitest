@@ -32,7 +32,6 @@ import static com.google.common.collect.Sets.*;
 import static java.util.logging.Level.*;
 import static org.infinitest.util.InfinitestUtils.*;
 
-import java.io.*;
 import java.util.*;
 
 import org.infinitest.parser.*;
@@ -70,13 +69,13 @@ class DefaultInfinitestCore implements InfinitestCore {
 	}
 
 	@Override
-	public synchronized int update(Collection<File> changedFiles) {
-		if (changedFiles.isEmpty()) {
+	public synchronized int update(Set<JavaClass> changedClasses) {
+		if (changedClasses.isEmpty()) {
 			return 0;
 		}
 
 		log(CONFIG, "Core Update " + name);
-		int testsRun = runOptimizedTestSet(changedFiles);
+		int testsRun = runOptimizedTestSet(changedClasses);
 		caughtExceptions.clear();
 		return testsRun;
 	}
@@ -100,9 +99,9 @@ class DefaultInfinitestCore implements InfinitestCore {
 		}
 	}
 
-	private int runOptimizedTestSet(Collection<File> changedFiles) {
+	private int runOptimizedTestSet(Set<JavaClass> changedClasses) {
 		Set<String> oldTests = testDetector.getCurrentTests();
-		Collection<JavaClass> testsToRun = testDetector.findTestsToRun(changedFiles);
+		Collection<JavaClass> testsToRun = testDetector.findTestsToRun(changedClasses);
 		Set<String> newTests = testDetector.getCurrentTests();
 		fireDisabledTestEvents(difference(oldTests, newTests));
 		if (!testsToRun.isEmpty()) {

@@ -27,7 +27,6 @@
  */
 package org.infinitest.parser;
 
-import java.io.*;
 import java.util.*;
 
 import org.infinitest.*;
@@ -35,7 +34,7 @@ import org.infinitest.*;
 public interface TestDetector {
 	void clear();
 
-	Set<JavaClass> findTestsToRun(Collection<File> changedFiles);
+	Set<JavaClass> findTestsToRun(Set<JavaClass> allChangedClasses);
 
 	void setClasspathProvider(ClasspathProvider classpath);
 
