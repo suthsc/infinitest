@@ -39,7 +39,6 @@ import javassist.bytecode.*;
 import javassist.bytecode.annotation.*;
 import junit.framework.*;
 
-import org.infinitest.*;
 import org.junit.Test;
 import org.junit.runner.*;
 
@@ -57,8 +56,6 @@ public class JavaAssistClass extends AbstractJavaClass {
 	private final boolean isATest;
 
 	public JavaAssistClass(CtClass classReference, File classFile) {
-		Log.log("JavaAssistClass : " + classReference.getName());
-
 		this.classFile = classFile;
 		this.className = classReference.getName();
 		this.imports = findImports(classReference);

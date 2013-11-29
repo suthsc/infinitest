@@ -104,7 +104,7 @@ class EclipseWorkspace implements WorkspaceFacade {
 		changedClasses.addAll(changedParents);
 
 		// run through total set, and pick out tests to run
-		Log.log("Total changeset: " + changedParents);
+		Log.log("Total changeset: " + changedParents.size());
 
 		updateEvent.fire();
 

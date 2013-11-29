@@ -56,8 +56,6 @@ public enum ClassFileIndex {
 	public void parseAndIndex(Collection<File> changedFiles) {
 		Set<JavaClass> changedClasses = new HashSet<JavaClass>();
 		for (File changedFile : changedFiles) {
-			Log.log("FileChanged : " + changedFile);
-
 			if (!changedFile.exists()) {
 				JavaClass old = classes.remove(changedFile);
 				if (old != null) {
@@ -77,7 +75,6 @@ public enum ClassFileIndex {
 						classes.put(changedFile, clazz);
 					}
 				} catch (IOException e) {
-					Log.log("ERROR " + e);
 					// Ignore
 				} finally {
 					if (inputStream != null) {

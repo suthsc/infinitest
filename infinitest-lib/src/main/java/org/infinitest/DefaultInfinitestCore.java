@@ -82,7 +82,6 @@ class DefaultInfinitestCore implements InfinitestCore {
 
 	@Override
 	public void reload() {
-		Log.log("RELOAD " + name);
 		log("Reloading core " + name);
 		testDetector.clear();
 
@@ -191,7 +190,6 @@ class DefaultInfinitestCore implements InfinitestCore {
 			log("Fatal error occured while updating Error while updating", e);
 			throw new FatalInfinitestError("Error running tests", e);
 		}
-		Log.log(name + " Error while updating" + e);
 		log(name + " Error while updating", e);
 		reload();
 		caughtExceptions.add(e.getClass());
