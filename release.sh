@@ -2,7 +2,7 @@
 abspath="$(cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}")"
 project_root=`dirname ${abspath}`
 main_site=${project_root}/../infinitest.github.com
-update_site=${main_site}
+update_site=${main_site}/experimental
 
 # Test for web project existence
 if [ ! -e ${main_site} ]; then
