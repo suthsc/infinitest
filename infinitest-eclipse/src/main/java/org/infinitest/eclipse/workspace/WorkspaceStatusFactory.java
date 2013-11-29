@@ -108,7 +108,7 @@ public class WorkspaceStatusFactory {
 		}
 	}
 
-	public static WorkspaceStatus findingTests(int totalTestsFound) {
+	public static WorkspaceStatus findingTestsMessage(int totalTestsFound) {
 		return new SimpleStringStatus(totalTestsFound + " tests found so far");
 	}
 }

@@ -67,7 +67,7 @@ class EclipseWorkspace implements WorkspaceFacade {
 	}
 
 	@Override
-	public void updateProjects(Collection<File> changedFiles) throws CoreException {
+	public synchronized void updateProjects(Collection<File> changedFiles) throws CoreException {
 		if (projectSet.hasErrors()) {
 			setStatus(workspaceErrors());
 		} else {
@@ -110,9 +110,14 @@ class EclipseWorkspace implements WorkspaceFacade {
 
 		int totalTests = 0;
 		for (ProjectFacade project : projectSet.projects()) {
-			setStatus(findingTests(totalTests));
 			totalTests += updateProject(project, changedClasses);
+
+			if (totalTests != 0) {
+				setStatus(findingTestsMessage(totalTests));
+			}
 		}
+		setStatus(findingTestsMessage(totalTests));
+
 		return totalTests;
 	}
 
