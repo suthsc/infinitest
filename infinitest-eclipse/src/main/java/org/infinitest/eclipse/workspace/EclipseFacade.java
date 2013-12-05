@@ -31,9 +31,24 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.launching.*;
 
+import com.google.common.cache.*;
+
 public class EclipseFacade {
+	private static final LoadingCache<IJavaProject, String[]> CACHE = CacheBuilder.newBuilder().build(new CacheLoader<IJavaProject, String[]>() {
+		@Override
+		public String[] load(IJavaProject project) throws CoreException {
+			String[] computeDefaultRuntimeClassPath = JavaRuntime.computeDefaultRuntimeClassPath(project);
+			return computeDefaultRuntimeClassPath;
+		}
+	});
+
 	public String[] computeDefaultRuntimeClassPath(IJavaProject project) throws CoreException {
-		return JavaRuntime.computeDefaultRuntimeClassPath(project);
+		long date1 = System.currentTimeMillis();
+		try {
+			return CACHE.getUnchecked(project);
+		} finally {
+			long date2 = System.currentTimeMillis();
+		}
 	}
 
 	public IRuntimeClasspathEntry[] computeUnresolvedRuntimeClasspath(IJavaProject project) throws CoreException {
