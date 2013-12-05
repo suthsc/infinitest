@@ -35,20 +35,20 @@ import org.infinitest.testrunner.process.*;
 import org.infinitest.testrunner.queue.*;
 
 public class MultiProcessRunner extends AbstractTestRunner {
+	private final ProcessConnectionFactory remoteProcessManager;
 	private QueueConsumer queueConsumer;
-
-	// DEBT Move into QueueConsumer.
-	private Queue<String> queue;
 
 	public MultiProcessRunner() {
 		this(new NativeConnectionFactory(JUnit4Runner.class), null);
 	}
 
 	public MultiProcessRunner(final ProcessConnectionFactory remoteProcessManager, RuntimeEnvironment environment) {
-		queue = new TestQueue(getTestPriority());
-
+		this.remoteProcessManager = remoteProcessManager;
 		setRuntimeEnvironment(environment);
-		queueConsumer = new QueueConsumer(getEventSupport(), queue) {
+	}
+
+	private QueueConsumer createQueueConsumer(final ProcessConnectionFactory remoteProcessManager) {
+		return new QueueConsumer(getEventSupport(), new TestQueue(getTestPriority())) {
 			@Override
 			protected QueueProcessor createQueueProcessor() throws IOException {
 				return new TestQueueProcessor(getEventSupport(), remoteProcessManager, getRuntimeEnvironment());
@@ -59,12 +59,15 @@ public class MultiProcessRunner extends AbstractTestRunner {
 	@Override
 	public void setConcurrencyController(ConcurrencyController semaphore) {
 		super.setConcurrencyController(semaphore);
-		queueConsumer.setConcurrencySemaphore(getConcurrencySemaphore());
 	}
 
 	@Override
 	public void runTests(List<String> testNames) {
 		if (!testNames.isEmpty()) {
+			if (queueConsumer == null) {
+				queueConsumer = createQueueConsumer(remoteProcessManager);
+			}
+			queueConsumer.setConcurrencySemaphore(getConcurrencySemaphore());
 			queueConsumer.push(testNames);
 		}
 	}

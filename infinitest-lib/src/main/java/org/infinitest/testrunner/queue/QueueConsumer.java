@@ -38,12 +38,12 @@ import org.infinitest.*;
 import org.infinitest.testrunner.*;
 
 public abstract class QueueConsumer {
-	private final Queue<String> testQueue;
 	private final RunnerEventSupport eventSupport;
-	private QueueProcessorThread processorThread;
+	private final Queue<String> testQueue;
 	private final long testTimeout;
 	private final ExecutorService executor;
 	private ConcurrencyController semaphore;
+	private QueueProcessorThread processorThread;
 
 	public QueueConsumer(RunnerEventSupport eventSupport, Queue<String> testQueue) {
 		this(eventSupport, testQueue, 2000);
@@ -53,8 +53,8 @@ public abstract class QueueConsumer {
 		this.eventSupport = eventSupport;
 		this.testQueue = testQueue;
 		this.testTimeout = testTimeout;
-		executor = newSingleThreadExecutor();
-		semaphore = new SingleLockConcurrencyController();
+		this.executor = newSingleThreadExecutor();
+		this.semaphore = new SingleLockConcurrencyController();
 	}
 
 	public void push(List<String> tests) {

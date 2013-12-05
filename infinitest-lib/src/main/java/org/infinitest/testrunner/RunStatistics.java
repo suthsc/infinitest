@@ -27,16 +27,15 @@
  */
 package org.infinitest.testrunner;
 
-import static com.google.common.collect.Maps.*;
 import static java.lang.System.*;
 
-import java.util.*;
+import com.google.common.util.concurrent.*;
 
 public class RunStatistics implements TestResultsListener {
-	private final Map<String, Long> failureTimestamps;
+	private final AtomicLongMap<String> failureTimestamps;
 
 	public RunStatistics() {
-		failureTimestamps = newHashMap();
+		failureTimestamps = AtomicLongMap.create();
 	}
 
 	private void update(TestEvent event) {
@@ -44,9 +43,6 @@ public class RunStatistics implements TestResultsListener {
 	}
 
 	public long getLastFailureTime(String testName) {
-		if (!failureTimestamps.containsKey(testName)) {
-			return 0;
-		}
 		return failureTimestamps.get(testName);
 	}
 
