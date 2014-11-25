@@ -132,6 +132,7 @@ public class IdeaModuleSettings implements ModuleSettings {
 	List<File> listClasspathElements() {
 		// Classpath order is significant
 		List<File> classpathElements = Lists.newArrayList();
+		Set<VirtualFile> uniqueElements = Sets.newHashSet();
 
 		// all our dependencies (recursively where needed)
 		for (OrderEntry entry : moduleRootManagerInstance().getOrderEntries()) {
@@ -144,7 +145,13 @@ public class IdeaModuleSettings implements ModuleSettings {
 				 */
 				Module currentModule = ((ModuleOrderEntry) entry).getModule();
 				if (currentModule != null) {
-					files.addAll(Arrays.asList(OrderEnumerator.orderEntries(currentModule).compileOnly().recursively().classes().getRoots()));
+					final VirtualFile[] virtualFiles = OrderEnumerator.orderEntries(currentModule).compileOnly().recursively().classes().getRoots();
+					for (VirtualFile virtualFile : virtualFiles) {
+						if (!uniqueElements.contains(virtualFile)) {
+							uniqueElements.add(virtualFile);
+							files.add(virtualFile);
+						}
+					}
 				}
 			} else if (entry instanceof LibraryOrderEntry) {
 				/*
@@ -152,13 +159,25 @@ public class IdeaModuleSettings implements ModuleSettings {
 				 * them.
 				 */
 				LibraryOrderEntry libraryOrderEntry = (LibraryOrderEntry) entry;
-				files.addAll(Arrays.asList(libraryOrderEntry.getRootFiles(OrderRootType.CLASSES)));
+				final VirtualFile[] virtualFiles = libraryOrderEntry.getRootFiles(OrderRootType.CLASSES);
+				for (VirtualFile virtualFile : virtualFiles) {
+					if (!uniqueElements.contains(virtualFile)) {
+						uniqueElements.add(virtualFile);
+						files.add(virtualFile);
+					}
+				}
 			} else {
 				/*
 				 * all other cases (whichever they are) we want to have their
 				 * classes outputs.
 				 */
-				files.addAll(Arrays.asList(entry.getFiles(OrderRootType.CLASSES)));
+				final VirtualFile[] virtualFiles = entry.getFiles(OrderRootType.CLASSES);
+				for (VirtualFile virtualFile : virtualFiles) {
+					if (!uniqueElements.contains(virtualFile)) {
+						uniqueElements.add(virtualFile);
+						files.add(virtualFile);
+					}
+				}
 			}
 			for (VirtualFile virtualFile : files) {
 				classpathElements.add(new File(virtualFile.getPath()));
