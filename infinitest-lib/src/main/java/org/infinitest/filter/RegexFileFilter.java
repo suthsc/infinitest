@@ -27,64 +27,131 @@
  */
 package org.infinitest.filter;
 
-import static com.google.common.collect.Lists.*;
-import static java.util.logging.Level.*;
-import static org.apache.commons.lang.StringUtils.*;
-import static org.infinitest.util.InfinitestUtils.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.regex.Pattern;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 
-import org.infinitest.parser.*;
+import org.infinitest.parser.JavaClass;
 
-import com.google.common.base.*;
-import com.google.common.io.*;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.logging.Level.INFO;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.infinitest.util.InfinitestUtils.log;
 
 public class RegexFileFilter implements TestFilter {
-  private final File file;
-  private final List<Pattern> filters = newArrayList();
 
-  public RegexFileFilter(File file) {
-    this.file = file;
-    if (!file.exists()) {
-      log(INFO, "Filter file " + file + " does not exist.");
-    }
-    updateFilterList();
-  }
+    private final static String INCLUDE_PREFIX = "++ ";
+    private final static String EXCLUDE_PREFIX = "-- ";
 
-  public boolean match(JavaClass javaClass) {
-    String className = javaClass.getName();
-    for (Pattern pattern : filters) {
-      if (pattern.matcher(className).lookingAt()) {
-        return true;
-      }
-    }
-    return false;
-  }
+    private final File file;
+    private final List<ClassFilter> filters = newArrayList();
 
-  @Override
-  public void updateFilterList() {
-    filters.clear();
-
-    if (file.exists()) {
-      readFilterFile();
-    }
-  }
-
-  private void readFilterFile() {
-    try {
-      for (String line : Files.readLines(file, Charsets.UTF_8)) {
-        if (isValidFilter(line)) {
-          filters.add(Pattern.compile(line));
+    public RegexFileFilter(File file) {
+        this.file = file;
+        if (!file.exists()) {
+            log(INFO, "Filter file " + file + " does not exist.");
         }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Something horrible happened to the filter file", e);
+        updateFilterList();
     }
-  }
 
-  private boolean isValidFilter(String line) {
-    return !isBlank(line) && !line.startsWith("!") && !line.startsWith("#");
-  }
+    public boolean match(JavaClass javaClass) {
+        String className = javaClass.getName();
+        for (ClassFilter filter : filters) {
+            if (filter.match(className)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void updateFilterList() {
+        filters.clear();
+
+        if (file.exists()) {
+            readFilterFile();
+        } else {
+            log(INFO, "Filtering file not in use.");
+        }
+    }
+
+    private void readFilterFile() {
+        try {
+            for (String line : Files.readLines(file, Charsets.UTF_8)) {
+                if (isValidFilter(line)) {
+                    if (line.startsWith(INCLUDE_PREFIX)) {
+                        filters.add(new IncludeFilter(line.substring(INCLUDE_PREFIX.length())));
+                    } else if (line.startsWith(EXCLUDE_PREFIX)) {
+                        filters.add(new ExcludeFilter(line.substring(EXCLUDE_PREFIX.length())));
+                    } else {
+                        filters.add(new DefaultFilter(line));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Something horrible happened to the filter file", e);
+        }
+    }
+
+    private boolean isValidFilter(String line) {
+        return !isBlank(line) && !line.startsWith("!") && !line.startsWith("#");
+    }
+
+    private interface ClassFilter {
+
+        boolean match(final String className);
+    }
+
+
+    private class DefaultFilter implements ClassFilter {
+
+        private final Pattern pattern;
+
+        public DefaultFilter(final String line) {
+            pattern = Pattern.compile(line);
+            log(INFO, "excluding (default) tests matching " + line);
+        }
+
+        @Override
+        public boolean match(final String className) {
+            return pattern.matcher(className).lookingAt();
+        }
+    }
+
+
+    private class IncludeFilter implements ClassFilter {
+
+        private final Pattern pattern;
+
+        public IncludeFilter(final String line) {
+            pattern = Pattern.compile(line);
+            log(INFO, "including tests matching " + line);
+        }
+
+        @Override
+        public boolean match(final String className) {
+            return pattern.matcher(className).lookingAt();
+        }
+    }
+
+
+    private class ExcludeFilter implements ClassFilter {
+
+        private final Pattern pattern;
+
+        public ExcludeFilter(final String line) {
+            pattern = Pattern.compile(line);
+            log(INFO, "excluding tests matching " + line);
+        }
+
+        @Override
+        public boolean match(final String className) {
+            return !pattern.matcher(className).lookingAt();
+        }
+    }
+
 }
