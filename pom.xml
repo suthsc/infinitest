@@ -9,21 +9,21 @@
 	<version>5.1.116-SNAPSHOT</version>
 	<url>http://infinitest.github.com/</url>
 
-	<modules>
-		<module>infinitest-lib</module>
-		<module>infinitest-runner</module>
-		<module>infinitest-intellij</module>
-		<module>infinitest-eclipse</module>
-	</modules>
+    <modules>
+        <module>infinitest-lib</module>
+        <module>infinitest-runner</module>
+        <module>infinitest-intellij</module>
+        <module>infinitest-eclipse</module>
+    </modules>
 
 	<prerequisites>
 		<maven>3.1</maven>
 	</prerequisites>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
 
 		<mockito.version>1.10.8</mockito.version>
 		<junit.version>4.12</junit.version>
@@ -33,55 +33,80 @@
 		<assertj.version>1.7.0</assertj.version>
 	</properties>
 
-	<profiles>
-		<profile>
-			<id>OSX</id>
-			<activation>
-				<os>
-					<family>mac</family>
-				</os>
-			</activation>
-			<properties>
-				<stop.stealing.focus>-Dapple.awt.UIElement=true</stop.stealing.focus>
-			</properties>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <id>OSX</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <stop.stealing.focus>-Dapple.awt.UIElement=true</stop.stealing.focus>
+            </properties>
+        </profile>
+    </profiles>
 
-	<developers>
-		<developer>
-			<id>benrady</id>
-			<name>Ben Rady</name>
-		</developer>
-		<developer>
-			<id>rfciii</id>
-			<name>Rod Coffin</name>
-		</developer>
-		<developer>
-			<name>Ryan Breidenbach</name>
-		</developer>
-		<developer>
-			<id>dgageot</id>
-			<name>David Gageot</name>
-		</developer>
-	</developers>
+    <developers>
+        <developer>
+            <id>benrady</id>
+            <name>Ben Rady</name>
+        </developer>
+        <developer>
+            <id>rfciii</id>
+            <name>Rod Coffin</name>
+        </developer>
+        <developer>
+            <name>Ryan Breidenbach</name>
+        </developer>
+        <developer>
+            <id>dgageot</id>
+            <name>David Gageot</name>
+        </developer>
+    </developers>
 
-	<scm>
-		<connection>scm:git://github.com/infinitest/infinitest.git</connection>
-		<developerConnection>scm:git@github.com:infinitest/infinitest.git</developerConnection>
-	</scm>
+    <scm>
+        <connection>scm:git://github.com/infinitest/infinitest.git</connection>
+        <developerConnection>scm:git@github.com:infinitest/infinitest.git</developerConnection>
+    </scm>
 
-	<issueManagement>
-		<system>Lighthouse</system>
-		<url>http://improvingworks.lighthouseapp.com/projects/36728-infinitest/tickets</url>
-	</issueManagement>
+    <issueManagement>
+        <system>Lighthouse</system>
+        <url>http://improvingworks.lighthouseapp.com/projects/36728-infinitest/tickets</url>
+    </issueManagement>
 
-	<licenses>
-		<license>
-			<name>MIT</name>
-			<url>http://opensource.org/licenses/MIT</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>1.5.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>1.10.8</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>18.0</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.7</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
 	<build>
 		<pluginManagement>
