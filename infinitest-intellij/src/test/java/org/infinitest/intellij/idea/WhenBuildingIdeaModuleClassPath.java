@@ -28,7 +28,7 @@
 package org.infinitest.intellij.idea;
 
 import static org.hamcrest.core.IsEqual.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.*;
@@ -64,11 +64,11 @@ public class WhenBuildingIdeaModuleClassPath {
 
 		final List<File> classPathElementsList = ideaModuleSettingsSpy.listClasspathElements();
 
-		assertThat(classPathElementsList.get(0).getPath(), equalTo(PATH_A));
-		assertThat(classPathElementsList.get(1).getPath(), equalTo(PATH_B));
-		assertThat(classPathElementsList.get(2).getPath(), equalTo(PATH_C));
-		assertThat(classPathElementsList.get(3).getPath(), equalTo(PATH_D));
-		assertThat(classPathElementsList.size(), equalTo(4));
+		assertThat(classPathElementsList).hasSize(4);
+		assertThat(classPathElementsList.get(0).getPath()).isEqualTo(PATH_A);
+		assertThat(classPathElementsList.get(1).getPath()).isEqualTo(PATH_B);
+		assertThat(classPathElementsList.get(2).getPath()).isEqualTo(PATH_C);
+		assertThat(classPathElementsList.get(3).getPath()).isEqualTo(PATH_D);
 	}
 
 	private static OrderEntry orderEntry() {

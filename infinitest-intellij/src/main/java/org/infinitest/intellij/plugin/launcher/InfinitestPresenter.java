@@ -27,24 +27,35 @@
  */
 package org.infinitest.intellij.plugin.launcher;
 
-import static com.google.common.collect.Lists.*;
-import static java.awt.Color.*;
-import static org.infinitest.intellij.plugin.launcher.StatusMessages.*;
-
 import java.awt.*;
-import java.util.*;
+import java.util.Collection;
 import java.util.List;
 
-import org.infinitest.*;
-import org.infinitest.intellij.*;
-import org.infinitest.intellij.plugin.swingui.*;
-import org.infinitest.testrunner.*;
-import org.infinitest.util.*;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.openapi.wm.WindowManager;
+import com.intellij.ui.awt.RelativePoint;
 
-import com.intellij.openapi.ui.*;
-import com.intellij.openapi.ui.popup.*;
-import com.intellij.openapi.wm.*;
-import com.intellij.ui.awt.*;
+import org.infinitest.CoreStatus;
+import org.infinitest.FailureListListener;
+import org.infinitest.InfinitestCore;
+import org.infinitest.ResultCollector;
+import org.infinitest.StatusChangeListener;
+import org.infinitest.TestControl;
+import org.infinitest.TestQueueEvent;
+import org.infinitest.TestQueueListener;
+import org.infinitest.intellij.InfinitestAnnotator;
+import org.infinitest.intellij.plugin.swingui.HaltTestAction;
+import org.infinitest.intellij.plugin.swingui.InfinitestView;
+import org.infinitest.intellij.plugin.swingui.ReloadIndexAction;
+import org.infinitest.intellij.plugin.swingui.SwingEventQueue;
+import org.infinitest.testrunner.TestEvent;
+import org.infinitest.util.InfinitestUtils;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.awt.Color.*;
+import static org.infinitest.intellij.plugin.launcher.StatusMessages.getMessage;
 
 public class InfinitestPresenter implements StatusChangeListener, TestQueueListener, FailureListListener {
 	public static final Color PASSING_COLOR = new Color(0x359b35);
