@@ -47,7 +47,7 @@ public class WhenUpdatingTheWorkspaceStatus {
 	@Test
 	public void shouldReportWhichTestsAreRunning() {
 		WorkspaceStatus status = runningTests(10, "org.fakeco.MyCurrentTest");
-		assertEquals("Running MyCurrentTest (9 remaining)", status.getMessage());
+		assertEquals("Running MyCurrentTest (10 remaining)", status.getMessage());
 		assertEquals("Current test: org.fakeco.MyCurrentTest", status.getToolTip());
 	}
 
