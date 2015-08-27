@@ -38,6 +38,7 @@ import com.google.common.io.Files;
 import org.infinitest.parser.JavaClass;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.logging.Level.FINEST;
 import static java.util.logging.Level.INFO;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.infinitest.util.InfinitestUtils.log;
@@ -113,7 +114,7 @@ public class RegexFileFilter implements TestFilter {
 
         public DefaultFilter(final String line) {
             pattern = Pattern.compile(line);
-            log(INFO, "excluding (default) tests matching " + line);
+            log(FINEST, "excluding (default) tests matching " + line);
         }
 
         @Override
@@ -129,7 +130,7 @@ public class RegexFileFilter implements TestFilter {
 
         public IncludeFilter(final String line) {
             pattern = Pattern.compile(line);
-            log(INFO, "including tests matching " + line);
+            log(FINEST, "including tests matching " + line);
         }
 
         @Override
@@ -145,7 +146,7 @@ public class RegexFileFilter implements TestFilter {
 
         public ExcludeFilter(final String line) {
             pattern = Pattern.compile(line);
-            log(INFO, "excluding tests matching " + line);
+            log(FINEST, "excluding tests matching " + line);
         }
 
         @Override
